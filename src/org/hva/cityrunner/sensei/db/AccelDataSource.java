@@ -165,6 +165,16 @@ public class AccelDataSource {
 		}
 		return lastId;
 	}
+	
+	public int getLastAccelRunId(){
+		String query = "SELECT max("+Database.MOVEMENT.COLUMN_NAME_RUN_ID+") from "+Database.MOVEMENT.TABLE_NAME;
+		Cursor c = database.rawQuery(query,null);
+		int lastId = 0;
+		if (c != null && c.moveToFirst()) {
+		    lastId = c.getInt(0); //The 0 is the column index, we only have 1 column, so the index is 0
+		}
+		return lastId;
+	}
 
 	private AccelData cursorToAccel(Cursor cursor) {
 		AccelData af = new AccelData();

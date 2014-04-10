@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+	<!-- Basic app strings -->
     <string name="app_name">SenseiLogger</string>
     <string name="action_settings">Settings</string>
     
+    <!-- Share dialog -->
+    <string name="share_title">I want to share a movement measurement with you</string>
+    <string name="share_body">Here is a movement measurement I did.</string>
+    <string name="share_dialog_title">Share movement measurement</string>
+    <string name="share_prefix_button">Share </string>
+   
     <string name="msg_sent_data">Inserted data point for \'%s\'</string>
 </resources>

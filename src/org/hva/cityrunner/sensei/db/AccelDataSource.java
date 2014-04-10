@@ -167,7 +167,7 @@ public class AccelDataSource {
 	}
 	
 	public int getLastAccelRunId(){
-		String query = "SELECT max("+Database.MOVEMENT.COLUMN_NAME_RUN_ID+") from "+Database.MOVEMENT.TABLE_NAME;
+		String query = "SELECT "+Database.MOVEMENT.COLUMN_NAME_RUN_ID+" from "+Database.MOVEMENT.TABLE_NAME +" ORDER BY cast("+Database.MOVEMENT.COLUMN_NAME_RUN_ID+" as REAL) DESC LIMIT 1";
 		Cursor c = database.rawQuery(query,null);
 		int lastId = 0;
 		if (c != null && c.moveToFirst()) {

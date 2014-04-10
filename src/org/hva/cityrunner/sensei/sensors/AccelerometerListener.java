@@ -21,7 +21,9 @@ public class AccelerometerListener implements SensorEventListener {
     private MainActivity accelerometerTest;
     private ArrayList<AccelData> samples;
     private AccelDataSource ads;
-    private int run_id;
+    public int run_id = 0;
+    private long sensorTimeReference = 0l;
+    private long myTimeReference = 0l;
     
     public AccelerometerListener(MainActivity accelerometerTest) {
         this.accelerometerTest = accelerometerTest;
@@ -35,12 +37,14 @@ public class AccelerometerListener implements SensorEventListener {
     	return samples;
     }
     
-    public void startRecording(int run_id) {
+    public void startRecording() {
         startTime = System.currentTimeMillis();
         numSamples = 0;
         isActive = true;
         this.samples = new ArrayList<AccelData>();
         ads = new AccelDataSource(accelerometerTest);
+        ads.open();
+        run_id = ads.getLastAccelRunId()+1;
         this.run_id = run_id;
 		
     }
@@ -78,17 +82,25 @@ public class AccelerometerListener implements SensorEventListener {
     			ads.close();
                 samples = new ArrayList<AccelData>();
             }
-            
-            samples.add(new AccelData(event.timestamp, event.values[0], event.values[1], event.values[2], run_id));
+//            if(sensorTimeReference == 0l && myTimeReference == 0l) {
+//                sensorTimeReference = event.timestamp;
+//                myTimeReference = System.currentTimeMillis();
+//            }
+            // set event timestamp to current time in milliseconds
+//            event.timestamp = myTimeReference + 
+//                Math.round((event.timestamp - sensorTimeReference) / 1000000.0);
+            samples.add(new AccelData(System.currentTimeMillis(), event.values[0], event.values[1], event.values[2], run_id));
         }
     }
     
     public void submitLastSensorData(){
-    	ads.open();
-        // ads.addAccelDataList(samples, 0, run_id);
-         ads.addAccelDataListFast(samples, 0, run_id);
+    	if(ads != null){
+    		ads.open();
+	    		// ads.addAccelDataList(samples, 0, run_id);
+    		ads.addAccelDataListFast(samples, 0, run_id);
 			ads.close();
-         samples = new ArrayList<AccelData>();
+			samples = new ArrayList<AccelData>();
+    	}
     }
     
     public void stopRecording(){

@@ -3,6 +3,7 @@
 	<!-- Basic app strings -->
     <string name="app_name">SenseiLogger</string>
     <string name="action_settings">Settings</string>
+    <string name="app_name_sim">Logger</string>
     
     <!-- Share dialog -->
     <string name="share_title">I want to share a movement measurement with you</string>
@@ -10,5 +11,14 @@
     <string name="share_dialog_title">Share movement measurement</string>
     <string name="share_prefix_button">Share </string>
    
+    <!-- Buttons -->
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+    
     <string name="msg_sent_data">Inserted data point for \'%s\'</string>
+    
+     <string name="error_invalidaddr">Invalid IP address</string>
+    <string name="error_neterror">Unknown UDP network problem</string>
+    <string name="error_sensorerror">Unknown IMU sensor problem</string>
+    <string name="error_warningwifi">Warning: Not connected to a WIFI network.</string>
 </resources>

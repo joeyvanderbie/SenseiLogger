@@ -6,7 +6,6 @@ import org.hva.cityrunner.sensei.data.AccelData;
 import org.hva.cityrunner.sensei.db.AccelDataSource;
 import org.hva.sensei.logger.MainActivity;
 
-import android.app.Activity;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -89,7 +88,10 @@ public class AccelerometerListener implements SensorEventListener {
             // set event timestamp to current time in milliseconds
 //            event.timestamp = myTimeReference + 
 //                Math.round((event.timestamp - sensorTimeReference) / 1000000.0);
-            samples.add(new AccelData(System.currentTimeMillis(), event.values[0], event.values[1], event.values[2], run_id));
+            samples.add(new AccelData(now, event.values[0], event.values[1], event.values[2], run_id));
+
+            Log.d("AcceleromterTest", event.values[0] + " " + event.values[1] + " " + event.values[2] + " " + run_id);
+        	//new UDPThread().execute(event.values[0] + ", " + event.values[1] + ", " + event.values[2] + ", " + now + ", "+ run_id);
         }
     }
     

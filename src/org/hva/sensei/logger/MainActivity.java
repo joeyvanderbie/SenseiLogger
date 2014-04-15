@@ -1,29 +1,45 @@
 package org.hva.sensei.logger;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.hva.cityrunner.sensei.data.AccelData;
 import org.hva.cityrunner.sensei.db.AccelDataSource;
+import org.hva.cityrunner.sensei.db.DatabaseHelper;
 import org.hva.cityrunner.sensei.sensors.AccelerometerListener;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -31,7 +47,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
-
+	public static DatagramSocket mSocket = null;
+    public static DatagramPacket mPacket = null;
 	    TextView textView;
 	    Button button1;
 	    Button button2;
@@ -45,6 +62,21 @@ public class MainActivity extends Activity {
 	    AccelerometerListener accelerometerListener;
 	    private int delayInMicroseconds = 45000; //for 20Hz sampling rate
 
+	    Sensor mSensor;
+
+	    // BroadcastReceiver for handling ACTION_SCREEN_OFF.
+	    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+	        @Override
+	 public void onReceive(Context context, Intent intent) {
+	            // Check action just to be on the safe side.
+	            if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+	                // Unregisters the listener and registers it again.
+	                sensorManager.unregisterListener(accelerometerListener);
+	                sensorManager.registerListener(accelerometerListener, accelerometer, delayInMicroseconds);
+	            }
+	 }
+	    };
+	    
 	    @Override
 	    public void onCreate(Bundle savedInstanceState) {
 	        super.onCreate(savedInstanceState);
@@ -55,8 +87,13 @@ public class MainActivity extends Activity {
 	                .getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
 	        
 	        accelerometerListener = new AccelerometerListener(this);
-	        sensorManager.registerListener(accelerometerListener, accelerometer, delayInMicroseconds);
+	        sensorManager.registerListener(accelerometerListener, accelerometer,delayInMicroseconds);
 
+	        // Register our receiver for the ACTION_SCREEN_OFF action. This will make our receiver
+	        // code be called whenever the phone enters standby mode.
+	        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+	        registerReceiver(mReceiver, filter);
+	        
 	        textView = (TextView) findViewById(R.id.text_view);
 	        button1 = (Button) findViewById(R.id.button1);
 	        button1.setOnClickListener(new View.OnClickListener() {
@@ -66,7 +103,10 @@ public class MainActivity extends Activity {
 				        button1.setEnabled(false);
 				        button2.setEnabled(true);
 				        textView.setText("Working...");
+
+						//start_UDP_Stream();
 				        accelerometerListener.startRecording();
+
 				}
 			});
 	        button2 = (Button) findViewById(R.id.button2);
@@ -77,6 +117,7 @@ public class MainActivity extends Activity {
 						button1.setEnabled(true);
 				        button2.setEnabled(false);
 				        accelerometerListener.stopRecording();
+				    //    stop_UDP_Stream();
 				        try {
 							exportAcceltoCSV(accelerometerListener.run_id);
 							updateFileList();
@@ -84,24 +125,46 @@ public class MainActivity extends Activity {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
+				        
+						String backupLocation = Environment.getExternalStorageDirectory()
+								.getAbsolutePath()
+								+ "/Sensei/backup"
+								+ System.currentTimeMillis() + ".zip";
+
+						ArrayList<String> uploadData = new ArrayList<String>();
+						uploadData.add(backupLocation);
+						makeZip mz = new makeZip(backupLocation);
+						mz.addZipFile(getDatabasePath(DatabaseHelper.DATABASE_NAME)
+								.getAbsolutePath());
+						mz.closeZip();
+
 				}
 			});
 	        
 			updateFileList();
-
-
 	    }
 	    
 
 	    protected void onResume() {
 	        super.onResume();
-	        sensorManager.registerListener(accelerometerListener, accelerometer,
-	                delayInMicroseconds);
+//	        sensorManager.registerListener(accelerometerListener, accelerometer,
+//	                delayInMicroseconds);
 	    }
 
 	    protected void onPause() {
 	        super.onPause();
+	        //sensorManager.unregisterListener(accelerometerListener);
+	    }
+	    
+	    @Override
+	    public void onDestroy() {
+	        // Unregister our receiver.
+	        unregisterReceiver(mReceiver);
+
+	        // Unregister from SensorManager.
 	        sensorManager.unregisterListener(accelerometerListener);
+	        stop_UDP_Stream();
+	        super.onDestroy();
 	    }
 
 	    private void updateFileList(){
@@ -273,5 +336,128 @@ public class MainActivity extends Activity {
 				}
 			}
 		}
+		
+		public class makeZip {
+			static final int BUFFER = 2048;
+
+			ZipOutputStream out;
+			byte data[];
+
+			public makeZip(String name) {
+				FileOutputStream dest = null;
+				try {
+					dest = new FileOutputStream(name);
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				out = new ZipOutputStream(new BufferedOutputStream(dest));
+				data = new byte[BUFFER];
+			}
+
+			public void addZipFile(String name) {
+				Log.v("addFile", "Adding: ");
+				FileInputStream fi = null;
+				try {
+					fi = new FileInputStream(name);
+					Log.v("addFile", "Adding: ");
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					Log.v("atch", "Adding: ");
+				}
+				BufferedInputStream origin = new BufferedInputStream(fi, BUFFER);
+				ZipEntry entry = new ZipEntry(name);
+				try {
+					out.putNextEntry(entry);
+					Log.v("put", "Adding: ");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				int count;
+				try {
+					while ((count = origin.read(data, 0, BUFFER)) != -1) {
+						out.write(data, 0, count);
+						// Log.v("Write", "Adding: "+origin.read(data, 0, BUFFER));
+					}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					Log.v("catch", "Adding: ");
+				}
+				try {
+					origin.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
+			public void closeZip() {
+				try {
+					out.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		private boolean start_UDP_Stream()
+		{
+			boolean isOnWifi = isOnWifi();
+	    	if(isOnWifi == false)
+	    	{
+	    		showDialog(R.string.error_warningwifi);
+	    		return false;
+	    	}
+	    	
+	    	
+			InetAddress client_adress = null;
+	        try {
+	            client_adress = InetAddress.getByName("130.37.157.223");// InetAddress.getByName(mIP_Adress.getText().toString());
+	        } catch (UnknownHostException e) {
+	        	showDialog(R.string.error_invalidaddr);
+	            return false;
+	        }
+	        try {
+	            mSocket = new DatagramSocket();
+	            mSocket.setReuseAddress(true);
+	        } catch (SocketException e) {
+	            mSocket = null;
+	        	showDialog(R.string.error_neterror);
+	            return false;}
+	        
+	        byte[] buf = new byte[256];
+	        int port;
+	        try {
+	            port = 5555;//Integer.parseInt(mPort.getText().toString());
+	            mPacket = new DatagramPacket(buf, buf.length, client_adress, port);
+	        } catch (Exception e) {
+	        	mSocket.close();
+	        	mSocket = null;
+	        	showDialog(R.string.error_neterror);
+	        	return false;
+	        }
+
+	        return true;
+	        
+	        
+		}
+		
+		private void stop_UDP_Stream()
+		    {
+		    	if (mSocket != null)
+		        	mSocket.close();
+		        mSocket = null;
+		        mPacket = null;
+		    	
+		    }
+		
+		private boolean isOnWifi() {
+	    	ConnectivityManager conman = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+	    	return conman.getNetworkInfo(ConnectivityManager.TYPE_WIFI).isConnectedOrConnecting();
+	    }
 	}
 

@@ -16,6 +16,11 @@
     <string name="stop">Stop</string>
     
     <string name="msg_sent_data">Inserted data point for \'%s\'</string>
+    <string name="msg_please_wait">Generating data files</string>
+    <string name="hint_target_ip">Target IP</string>
+    <string name="hint_target_port">Target port</string>
+    <string name="label_data_to_target">Stream data to IP</string>
+    <string name="label_data_files">File list</string>
     
      <string name="error_invalidaddr">Invalid IP address</string>
     <string name="error_neterror">Unknown UDP network problem</string>

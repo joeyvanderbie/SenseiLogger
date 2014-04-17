@@ -91,7 +91,7 @@ public class AccelerometerListener implements SensorEventListener {
             samples.add(new AccelData(now, event.values[0], event.values[1], event.values[2], run_id));
 
             Log.d("AcceleromterTest", event.values[0] + " " + event.values[1] + " " + event.values[2] + " " + run_id);
-        	//new UDPThread().execute(event.values[0] + ", " + event.values[1] + ", " + event.values[2] + ", " + now + ", "+ run_id);
+        	new UDPThread().execute(event.values[0] + ", " + event.values[1] + ", " + event.values[2] + ", " + now + ", "+ run_id);
         }
     }
     

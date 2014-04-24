@@ -1,10 +1,10 @@
-package org.hva.cityrunner.sensei.db;
+package org.hva.sensei.db;
 
 import java.util.ArrayList;
 
-import org.hva.cityrunner.sensei.data.AffectData;
 import org.hva.createit.digitallife.sam.Affect;
 import org.hva.createit.digitallife.sam.AffectDomain;
+import org.hva.sensei.data.AffectData;
 
 import android.content.ContentValues;
 import android.content.Context;

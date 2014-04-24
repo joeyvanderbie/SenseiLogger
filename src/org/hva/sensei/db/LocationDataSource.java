@@ -1,10 +1,10 @@
-package org.hva.cityrunner.sensei.db;
+package org.hva.sensei.db;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hva.cityrunner.sensei.data.GyroData;
-import org.hva.cityrunner.sensei.data.LocationData;
+import org.hva.sensei.data.GyroData;
+import org.hva.sensei.data.LocationData;
 
 import android.content.ContentValues;
 import android.content.Context;

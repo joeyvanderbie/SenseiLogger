@@ -1,4 +1,4 @@
-package org.hva.cityrunner.sensei.data;
+package org.hva.sensei.data;
 
 import android.location.Location;
 

@@ -1,4 +1,4 @@
-package org.hva.cityrunner.sensei.sensors;
+package org.hva.sensei.sensors;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

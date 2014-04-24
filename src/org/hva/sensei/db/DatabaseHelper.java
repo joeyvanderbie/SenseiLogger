@@ -1,4 +1,4 @@
-package org.hva.cityrunner.sensei.db;
+package org.hva.sensei.db;
 
 import android.content.ContentValues;
 import android.content.Context;

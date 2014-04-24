@@ -20,10 +20,10 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import org.hva.cityrunner.sensei.data.AccelData;
-import org.hva.cityrunner.sensei.db.AccelDataSource;
-import org.hva.cityrunner.sensei.db.DatabaseHelper;
-import org.hva.cityrunner.sensei.sensors.AccelerometerListener;
+import org.hva.sensei.data.AccelData;
+import org.hva.sensei.db.AccelDataSource;
+import org.hva.sensei.db.DatabaseHelper;
+import org.hva.sensei.sensors.AccelerometerListener;
 
 import android.app.Activity;
 import android.app.ProgressDialog;

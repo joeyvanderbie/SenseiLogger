@@ -1,9 +1,9 @@
-package org.hva.cityrunner.sensei.sensors;
+package org.hva.sensei.sensors;
 
 import java.util.ArrayList;
 
-import org.hva.cityrunner.sensei.data.AccelData;
-import org.hva.cityrunner.sensei.db.AccelDataSource;
+import org.hva.sensei.data.AccelData;
+import org.hva.sensei.db.AccelDataSource;
 import org.hva.sensei.logger.MainActivity;
 
 import android.hardware.Sensor;

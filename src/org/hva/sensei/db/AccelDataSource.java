@@ -1,9 +1,9 @@
-package org.hva.cityrunner.sensei.db;
+package org.hva.sensei.db;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hva.cityrunner.sensei.data.AccelData;
+import org.hva.sensei.data.AccelData;
 
 import android.content.ContentValues;
 import android.content.Context;

@@ -1,9 +1,9 @@
-package org.hva.cityrunner.sensei.db;
+package org.hva.sensei.db;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hva.cityrunner.sensei.data.RouteRunData;
+import org.hva.sensei.data.RouteRunData;
 
 import android.content.ContentValues;
 import android.content.Context;

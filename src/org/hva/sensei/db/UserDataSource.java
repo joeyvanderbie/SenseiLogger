@@ -1,6 +1,6 @@
-package org.hva.cityrunner.sensei.db;
+package org.hva.sensei.db;
 
-import org.hva.cityrunner.sensei.data.UserData;
+import org.hva.sensei.data.UserData;
 
 import android.content.ContentValues;
 import android.content.Context;

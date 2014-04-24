@@ -1,4 +1,4 @@
-package org.hva.cityrunner.sensei.data;
+package org.hva.sensei.data;
 
 import org.hva.createit.digitallife.sam.Affect;
 import org.hva.createit.digitallife.sam.AffectDomain;

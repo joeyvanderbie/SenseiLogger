@@ -1,9 +1,9 @@
-package org.hva.cityrunner.sensei.sensors;
+package org.hva.sensei.sensors;
 
 import java.util.ArrayList;
 
-import org.hva.cityrunner.sensei.data.GyroData;
-import org.hva.cityrunner.sensei.db.GyroDataSource;
+import org.hva.sensei.data.GyroData;
+import org.hva.sensei.db.GyroDataSource;
 
 import android.app.Activity;
 import android.hardware.Sensor;

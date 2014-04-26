@@ -3,7 +3,8 @@
 	<!-- Basic app strings -->
     <string name="app_name">SenseiLogger</string>
     <string name="action_settings">Settings</string>
-    <string name="app_name_sim">Logger</string>
+    <string name="app_name_sim">Movement logger</string>
+    <string name="app_name_voice">Voice logger</string>
     
     <!-- Share dialog -->
     <string name="share_title">I want to share a movement measurement with you</string>
@@ -21,6 +22,14 @@
     <string name="hint_target_port">Target port</string>
     <string name="label_data_to_target">Stream data to IP</string>
     <string name="label_data_files">File list</string>
+    
+    <string name="label_recording_duration">Recording duration in seconds</string>
+    <string name="label_recording_frequency">Recording frequency in seconds</string>
+    <string name="next_recording">Next recording in</string>
+    <string name="recording_duration">Recording duration</string>
+    <string name="time_unit_minutes">minutes</string>
+    <string name="time_unit_seconds">seconds</string>
+       
     
      <string name="error_invalidaddr">Invalid IP address</string>
     <string name="error_neterror">Unknown UDP network problem</string>

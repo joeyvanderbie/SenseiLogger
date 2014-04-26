@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <!-- style colors  -->
+	<color name="active">#49c28f</color>
+	<color name="optional">#6080f2</color>
+	<color name="disruptive">#ed1f1f</color>
+	<color name="neutral">#b3bec6</color>
+	<color name="accent">#7dd4b4</color>
+	
+	<color name="background">#FEFEFE</color>
+	<color name="dark">#444444</color>
+	<color name="light">#ffffff</color>
+	
+	
+</resources>

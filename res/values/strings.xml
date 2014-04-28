@@ -41,6 +41,7 @@
     
     <string name="label_recording_duration">Recording duration in seconds</string>
     <string name="label_recording_frequency">Recording frequency in seconds</string>
+    <string name="label_recording_message">Question</string>
     <string name="next_recording">Next recording in</string>
     <string name="recording_duration">Recording duration</string>
     <string name="time_unit_minutes">minutes</string>

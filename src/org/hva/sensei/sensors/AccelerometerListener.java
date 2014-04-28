@@ -62,12 +62,13 @@ public class AccelerometerListener implements SensorEventListener {
             numSamples++;
             long now = System.currentTimeMillis();
             
+            if((now - startTime) % 500 < 100 ){
+            	samplingRate = numSamples / ((now - startTime) / 1000.0);      
+            	 accelerometerTest.displayRates();
+            }
+            
             if (now >= startTime + 5000) {
-                samplingRate = numSamples / ((now - startTime) / 1000.0);             
-                
-//            if (numSamples % 1000 == 0) {
-                samplingRate = numSamples / ((now - startTime) / 1000.0);                
-              //  isActive = false;
+                samplingRate = numSamples / ((now - startTime) / 1000.0);
                 startTime = now;
                 numSamples = 0;
                 

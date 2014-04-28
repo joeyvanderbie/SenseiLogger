@@ -16,6 +16,15 @@
         <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
  <uses-permission android:name="android.permission.WAKE_LOCK"/>
+  
+  <!-- Declare this required feature if you want to make the app available to BLE-capable
+    devices only.  If you want to make your app available to devices that don't support BLE,
+    you should omit this in the manifest.  Instead, determine BLE capability by using
+    PackageManager.hasSystemFeature(FEATURE_BLUETOOTH_LE) -->
+    <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    
 	
     <!-- DEFINE REQUIRED FEATURES FOR LOCATION SENSORS -->
     <uses-feature
@@ -37,6 +46,7 @@
             </intent-filter>
         </activity>
         
+        <service android:name="org.hva.sensei.sensors.bluetooth.BluetoothLeService" android:enabled="true"/>
     </application>
 
 </manifest>

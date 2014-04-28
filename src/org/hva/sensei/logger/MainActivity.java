@@ -22,12 +22,10 @@ import java.util.zip.ZipOutputStream;
 
 import org.hva.sensei.data.AccelData;
 import org.hva.sensei.db.AccelDataSource;
-import org.hva.sensei.db.DatabaseHelper;
 import org.hva.sensei.sensors.AccelerometerListener;
+import org.hva.sensei.sensors.bluetooth.BluetoothHeartRateActivity;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
-import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -51,12 +49,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-public class MainActivity extends Activity {
+public class MainActivity extends BluetoothHeartRateActivity {
 	public static DatagramSocket mSocket = null;
 	public static DatagramPacket mPacket = null;
 	TextView mIP_Adress;
 	TextView mPort;
-	TextView textView;
+	TextView sampling_rate_textview;
 	Button button1;
 	Button button2;
 	Button button3;
@@ -72,7 +70,6 @@ public class MainActivity extends Activity {
 	private boolean streamData = false;
 	Sensor mSensor;
 
-	private BluetoothAdapter mBluetoothAdapter;
 	private boolean mScanning;
 	private Handler mHandler;
 
@@ -94,6 +91,9 @@ public class MainActivity extends Activity {
 		}
 	};
 
+	private TextView heart_rate;
+//	private Button connect;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -118,7 +118,7 @@ public class MainActivity extends Activity {
 		wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
 				"SenseiWakeLock");
 
-		textView = (TextView) findViewById(R.id.text_view);
+		sampling_rate_textview = (TextView) findViewById(R.id.sampling_rate_info);
 		button1 = (Button) findViewById(R.id.button1);
 		button1.setOnClickListener(new View.OnClickListener() {
 
@@ -129,7 +129,7 @@ public class MainActivity extends Activity {
 
 				button2.setVisibility(View.VISIBLE);
 				button2.setEnabled(true);
-				textView.setText("Working...");
+				sampling_rate_textview.setText("...");
 
 				// start_UDP_Stream();
 				accelerometerListener.startRecording();
@@ -148,7 +148,7 @@ public class MainActivity extends Activity {
 				button2.setEnabled(false);
 				button2.setVisibility(View.GONE);
 				
-				textView.setText("");
+				sampling_rate_textview.setText("-");
 				
 				accelerometerListener.stopRecording();
 				wakeLock.release();
@@ -199,8 +199,16 @@ public class MainActivity extends Activity {
 
 		updateFileList();
 
-		// start bluetooth hr service
-		// listen for bluetooth hr servie
+		//bluetooth hr
+		 heart_rate = (TextView) findViewById(R.id.heart_rate_info);
+//		 connect = (Button) findViewById(R.id.connect_device);
+//		 connect.setOnClickListener(new View.OnClickListener() {
+//			
+//			@Override
+//			public void onClick(View arg0) {
+//				scanLeDevice(true);
+//			}
+//		});
 	}
 
 	protected void onResume() {
@@ -222,8 +230,11 @@ public class MainActivity extends Activity {
 		// Unregister from SensorManager.
 		sensorManager.unregisterListener(accelerometerListener);
 		stop_UDP_Stream();
-		wakeLock.release();
+		if (wakeLock.isHeld()){
+			wakeLock.release();
+		}
 		super.onDestroy();
+
 	}
 
 	private void updateFileList() {
@@ -261,8 +272,7 @@ public class MainActivity extends Activity {
 	public void displayRates() {
 		// button1.setEnabled(true);
 
-		textView.setText(String.format("Sampling rate: %.2f",
-				accelerometerListener.getSamplingRate()));
+		sampling_rate_textview.setText(""+Math.round(accelerometerListener.getSamplingRate()));
 	}
 
 	public void exportAcceltoCSV(final int runId) throws IOException {
@@ -520,5 +530,33 @@ public class MainActivity extends Activity {
 		ConnectivityManager conman = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 		return conman.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
 				.isConnectedOrConnecting();
+	}
+	
+	@Override
+	protected void processData(String data){
+		if(mConnected){
+			Log.d(TAG, "Hear rate data: "+data);
+			if(heart_rate != null){
+				heart_rate.setText(data);
+			}
+		}
+	}
+	
+	@Override
+	protected void onBluetoothDisconnected(){
+		Log.d(TAG, "Hear rate sensor disconnected");
+		if(heart_rate != null){
+			heart_rate.setText("-");
+		}
+		//connect.setVisibility(View.VISIBLE);
+	}
+	
+	@Override
+	protected void onBluetoothConnected(){
+		Log.d(TAG, "Hear rate sensor connected");
+		if(heart_rate != null){
+			heart_rate.setText("...");
+//			connect.setVisibility(View.GONE);
+		}
 	}
 }

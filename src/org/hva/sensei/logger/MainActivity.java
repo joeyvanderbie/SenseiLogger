@@ -23,6 +23,7 @@ import java.util.zip.ZipOutputStream;
 import org.hva.sensei.data.AccelData;
 import org.hva.sensei.db.AccelDataSource;
 import org.hva.sensei.sensors.AccelerometerListener;
+import org.hva.sensei.sensors.UDPThread;
 import org.hva.sensei.sensors.bluetooth.BluetoothHeartRateActivity;
 
 import android.app.ProgressDialog;
@@ -538,6 +539,7 @@ public class MainActivity extends BluetoothHeartRateActivity {
 			Log.d(TAG, "Hear rate data: "+data);
 			if(heart_rate != null){
 				heart_rate.setText(data);
+				new UDPThread().execute(data + ", " + System.currentTimeMillis());
 			}
 		}
 	}

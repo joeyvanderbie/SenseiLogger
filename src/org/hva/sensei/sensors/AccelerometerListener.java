@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.hva.sensei.data.AccelData;
 import org.hva.sensei.db.AccelDataSource;
-import org.hva.sensei.logger.MainActivity;
+import org.hva.sensei.logger.MainMovementActivity;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -17,14 +17,14 @@ public class AccelerometerListener implements SensorEventListener {
     private int numSamples;
     private boolean isActive = false;
     private double samplingRate = 0.0;
-    private MainActivity accelerometerTest;
+    private MainMovementActivity accelerometerTest;
     private ArrayList<AccelData> samples;
     private AccelDataSource ads;
     public int run_id = 0;
     private long sensorTimeReference = 0l;
     private long myTimeReference = 0l;
     
-    public AccelerometerListener(MainActivity accelerometerTest) {
+    public AccelerometerListener(MainMovementActivity accelerometerTest) {
         this.accelerometerTest = accelerometerTest;
         
     }

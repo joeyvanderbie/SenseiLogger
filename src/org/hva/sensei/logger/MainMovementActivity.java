@@ -50,7 +50,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-public class MainActivity extends BluetoothHeartRateActivity {
+public class MainMovementActivity extends BluetoothHeartRateActivity {
 	public static DatagramSocket mSocket = null;
 	public static DatagramPacket mPacket = null;
 	TextView mIP_Adress;
@@ -114,7 +114,7 @@ public class MainActivity extends BluetoothHeartRateActivity {
 		IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
 		registerReceiver(mReceiver, filter);
 
-		PowerManager mgr = (PowerManager) MainActivity.this
+		PowerManager mgr = (PowerManager) MainMovementActivity.this
 				.getSystemService(Context.POWER_SERVICE);
 		wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
 				"SenseiWakeLock");
@@ -307,7 +307,7 @@ public class MainActivity extends BluetoothHeartRateActivity {
 						OutputStreamWriter osw = new OutputStreamWriter(fOut);
 
 						AccelDataSource ads = new AccelDataSource(
-								MainActivity.this);
+								MainMovementActivity.this);
 						ads.open();
 						ArrayList<AccelData> allAccel = ads.getAllAccel(runId,
 								ads.getAllAccelCount(runId), 0);

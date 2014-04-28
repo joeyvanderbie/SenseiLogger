@@ -1,8 +1,13 @@
 package org.hva.sensei.logger;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
@@ -13,10 +18,15 @@ import org.hva.sensei.sensors.record.VuMeterView;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -178,7 +188,41 @@ public class MainRecordActivity extends Activity {
 			} finally {
 				record_button.setChecked(false);
 				record_button.setEnabled(true);
+				updateFileList();
 			}
 		}
 	}
+	
+	private void updateFileList() {
+		File dir = new File(PATH_TO_FILES);
+		List<String> list = Util.getSortedFilenames(dir, ".wav");
+		LinearLayout files = (LinearLayout) findViewById(R.id.fileList);
+		files.removeAllViews();
+		for (final String file : list) {
+			Button b = new Button(this);
+			b.setText(this.getString(R.string.share_prefix_button) + " "+file);
+			b.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					Intent sharingIntent = new Intent(
+							android.content.Intent.ACTION_SEND);
+		            sharingIntent.setType("audio/wav");
+					sharingIntent.putExtra(
+							android.content.Intent.EXTRA_SUBJECT,
+							getResources().getString(R.string.share_title));
+					sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT,
+							getResources().getString(R.string.share_body));
+					sharingIntent.putExtra(Intent.EXTRA_STREAM,
+							Uri.parse("file:///" + PATH_TO_FILES + "/" + file));
+					startActivity(Intent.createChooser(
+							sharingIntent,
+							getResources().getString(
+									R.string.share_dialog_title)));
+				}
+			});
+			files.addView(b);
+		}
+	}
+
 }

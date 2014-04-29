@@ -20,6 +20,7 @@ import android.os.Environment;
 public class AudioRecorder {
     final MediaRecorder recorder = new MediaRecorder();
     final String path;
+    private boolean isActive = false;
 
     /**
      * Creates a new audio recording at the given path (relative to root of SD
@@ -70,6 +71,7 @@ public class AudioRecorder {
         recorder.prepare();
         recorder.start();
 
+        isActive = true;
     }
 
     /**
@@ -78,6 +80,11 @@ public class AudioRecorder {
     public void stop() throws IOException {
         recorder.stop();
         recorder.release();
+        isActive = false;
+    }
+    
+    public boolean isActive(){
+    	return isActive;
     }
 
 }

@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
@@ -20,6 +22,9 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -32,6 +37,8 @@ public class MainRecordActivity extends Activity {
 	private AudioRecorder mRecorder = null;
 	private Timer recordingTimer = null;
 	private Timer frequencyTimer = null;
+	private RecordTriggerAfterSpeech rc = null;
+	private TextToSpeech ttobj;
 	private long mRecordingStartTime = 0;
 	private long mRecordingFrequencyStartTime = 0;
 	private String mLastFileName = "";
@@ -44,8 +51,8 @@ public class MainRecordActivity extends Activity {
 	private TextView recording_frequency_view;
 	private TextView recording_duration_icon;
 
-	private int recording_duration = 30;
-	private int recording_frequency = 300;
+	private int recording_duration = 5;
+	private int recording_frequency = 5;
 
 	class RecordTask extends TimerTask {
 		public void run() {
@@ -85,7 +92,7 @@ public class MainRecordActivity extends Activity {
 
 	class RecordFrequencyTask extends TimerTask {
 		public void run() {
-			final TextView durationText = (TextView) findViewById(R.id.recording_timer_info);
+			final TextView durationText = (TextView) findViewById(R.id.time_info);
 			final long duration = (recording_frequency * 1000)
 					- (System.currentTimeMillis() - mRecordingFrequencyStartTime);
 
@@ -104,7 +111,8 @@ public class MainRecordActivity extends Activity {
 			if (duration <= 0) {
 				runOnUiThread(new Runnable() {
 					public void run() {
-						onClickRecord(true);
+						//onClickRecord(true);
+						startRecordingWithQuestion();
 					}
 				});
 
@@ -112,12 +120,47 @@ public class MainRecordActivity extends Activity {
 
 		}
 	}
+	
+	class RecordTriggerAfterSpeech extends UtteranceProgressListener{
+		public String currentId;
+
+		@Override
+		public void onDone(String utteranceId) {
+				onClickRecord(true);
+		}
+
+		@Override
+		public void onError(String utteranceId) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onStart(String utteranceId) {
+			// TODO Auto-generated method stub
+			
+		}
+		
+		
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_voice);
 
+		rc = new RecordTriggerAfterSpeech();
+	     ttobj=new TextToSpeech(getApplicationContext(), 
+	 	        new TextToSpeech.OnInitListener() {
+	 	        @Override
+	 	        public void onInit(int status) {
+	 	           if(status != TextToSpeech.ERROR){
+	 	               ttobj.setLanguage(Locale.UK);
+	 	              }	
+	 	           }
+	 	        });
+	     ttobj.setOnUtteranceProgressListener(rc);
+		
 		record_button = (ToggleButton) findViewById(R.id.button_start);
 		record_button.setOnClickListener(new View.OnClickListener() {
 
@@ -137,6 +180,9 @@ public class MainRecordActivity extends Activity {
 		recording_frequency_view = (TextView) findViewById(R.id.recording_frequency);
 		recording_frequency_view.setText("" + recording_frequency);
 		recording_duration_icon = (TextView) findViewById(R.id.recording_timer_info_icon);
+		
+		updateFileList();
+
 
 	}
 
@@ -174,18 +220,19 @@ public class MainRecordActivity extends Activity {
 	}
 
 	private void startRecordingWithFrequency(boolean start) {
-		if (record_button.isChecked()) {
+		if (start) {
 			mRecordingFrequencyStartTime = System.currentTimeMillis();
 
 			// force disabled before recording
-			record_button.setChecked(false);
+			record_button.setChecked(true);
+			
+
 			record_button.setEnabled(false);
-			//
 			frequencyTimer = new Timer();
+			record_button.setEnabled(true);
 			frequencyTimer.schedule(new RecordFrequencyTask(), 10, 50);
 		} else {
-			record_button.setChecked(true);
-			record_button.setEnabled(false);
+			record_button.setChecked(false);
 
 			// stop recording
 			onClickRecord(false);
@@ -197,8 +244,19 @@ public class MainRecordActivity extends Activity {
 			record_button.setEnabled(true);
 		}
 	}
+	
+	private void startRecordingWithQuestion(){
+		frequencyTimer.cancel();
+		
+		//tts play
+		HashMap<String, String> map = new HashMap<String, String>();
+		map.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "UniqueID");
 
-	private void onClickRecord(boolean start) {
+		String toSpeak = "question";
+           ttobj.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, map);
+	}
+
+	protected void onClickRecord(boolean start) {
 //		record_button.setChecked(start);
 		//if (record_button.isChecked()) {
 		if(start){
@@ -222,9 +280,9 @@ public class MainRecordActivity extends Activity {
 //				record_button.setEnabled(true);
 			} finally {
 //				record_button.setChecked(true);
-//				record_button.setEnabled(true);
+				record_button.setEnabled(true);
 
-				recording_duration_icon.setVisibility(View.VISIBLE);
+				//recording_duration_icon.setVisibility(View.VISIBLE);
 				
 				recordingTimer = new Timer();
 				recordingTimer.schedule(new RecordTask(), 10, 50);
@@ -236,8 +294,12 @@ public class MainRecordActivity extends Activity {
 //			record_button.setEnabled(false);
 
 			try {
-				recordingTimer.cancel();
-				mRecorder.stop();
+				if(recordingTimer != null){
+					recordingTimer.cancel();
+				}
+				if(mRecorder.isActive()){
+					mRecorder.stop();
+				}
 
 				// ToggleButton playBtn = (ToggleButton)
 				// findViewById(R.id.btnPlayLastRecord);
@@ -247,11 +309,13 @@ public class MainRecordActivity extends Activity {
 				makeAlert("Error while stopping recording:\n" + e.getMessage());
 //				record_button.setChecked(true);
 //				record_button.setEnabled(true);
-			} finally {
+			} catch (NullPointerException e) {
+				Log.d("RecordingActivity","No recorder object");
+			}finally {
 //				record_button.setChecked(false);
 //				record_button.setEnabled(true);
 
-				recording_duration_icon.setVisibility(View.GONE);
+				//recording_duration_icon.setVisibility(View.GONE);
 				updateFileList();
 			}
 		}

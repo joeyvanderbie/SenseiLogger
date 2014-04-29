@@ -50,6 +50,7 @@ public class MainRecordActivity extends Activity {
 	private TextView recording_duration_view;
 	private TextView recording_frequency_view;
 	private TextView recording_duration_icon;
+	private TextView recording_message;
 
 	private int recording_duration = 5;
 	private int recording_frequency = 5;
@@ -179,7 +180,9 @@ public class MainRecordActivity extends Activity {
 		recording_duration_view.setText("" + recording_duration);
 		recording_frequency_view = (TextView) findViewById(R.id.recording_frequency);
 		recording_frequency_view.setText("" + recording_frequency);
-		recording_duration_icon = (TextView) findViewById(R.id.recording_timer_info_icon);
+		//recording_duration_icon = (TextView) findViewById(R.id.recording_timer_info_icon);
+		
+		recording_message = (TextView) findViewById(R.id.recording_message);
 		
 		updateFileList();
 
@@ -252,7 +255,7 @@ public class MainRecordActivity extends Activity {
 		HashMap<String, String> map = new HashMap<String, String>();
 		map.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "UniqueID");
 
-		String toSpeak = "question";
+		String toSpeak = recording_message.getText().toString();
            ttobj.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, map);
 	}
 

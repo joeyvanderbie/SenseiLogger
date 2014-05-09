@@ -49,11 +49,14 @@ public class MainRecordActivity extends Activity {
 	private ToggleButton record_button;
 	private TextView recording_duration_view;
 	private TextView recording_frequency_view;
+	private TextView recording_frequency_count_view;
 	private TextView recording_duration_icon;
 	private TextView recording_message;
 
 	private int recording_duration = 5;
 	private int recording_frequency = 5;
+	private int recording_frequency_count = 5;
+	private int current_frequency_count = 0;
 
 	class RecordTask extends TimerTask {
 		public void run() {
@@ -171,6 +174,9 @@ public class MainRecordActivity extends Activity {
 						.getText().toString());
 				recording_frequency = Integer.parseInt(recording_frequency_view
 						.getText().toString());
+				recording_frequency_count = Integer.parseInt(recording_frequency_count_view
+						.getText().toString());
+				current_frequency_count = 0;
 				//onClickRecord(((ToggleButton) v).isChecked());
 				startRecordingWithFrequency(((ToggleButton) v).isChecked());
 			}
@@ -180,7 +186,9 @@ public class MainRecordActivity extends Activity {
 		recording_duration_view.setText("" + recording_duration);
 		recording_frequency_view = (TextView) findViewById(R.id.recording_frequency);
 		recording_frequency_view.setText("" + recording_frequency);
-		//recording_duration_icon = (TextView) findViewById(R.id.recording_timer_info_icon);
+		recording_frequency_count_view = (TextView) findViewById(R.id.recording_frequency_count);
+		recording_frequency_count_view.setText("" + recording_frequency_count);
+		
 		
 		recording_message = (TextView) findViewById(R.id.recording_message);
 		
@@ -223,7 +231,8 @@ public class MainRecordActivity extends Activity {
 	}
 
 	private void startRecordingWithFrequency(boolean start) {
-		if (start) {
+		if (start && current_frequency_count < recording_frequency_count) {
+			current_frequency_count++;
 			mRecordingFrequencyStartTime = System.currentTimeMillis();
 
 			// force disabled before recording

@@ -65,6 +65,7 @@ public class AudioRecorder {
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
 //        recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
 //        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+//        recorder.setAudioSamplingRate(); set to 16khz, 8 also ok, not 44, downsample to 16.
         recorder.setOutputFormat(MediaRecorder.OutputFormat.AMR_WB);
         recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_WB);
         recorder.setOutputFile(path);

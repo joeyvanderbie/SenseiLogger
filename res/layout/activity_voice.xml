@@ -46,20 +46,6 @@
             android:background="@color/background"
             android:orientation="vertical" >
 
-            <TextView
-                android:id="@+id/text_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="6dp"
-                android:text="Indication text for communication message, like: recording"
-                tools:context=".MainMovementActivity" />
-
-            <org.hva.sensei.sensors.record.VuMeterView
-                android:id="@+id/vuMeterView"
-                android:layout_width="match_parent"
-                android:layout_height="30dip"
-                android:layout_marginTop="@dimen/activity_vertical_margin" />
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="70dip"
@@ -126,12 +112,12 @@
 
                         <TextView
                             android:id="@+id/recording_timer_info_icon"
+                            style="@color/disruptive"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="o"
-                            style="@color/disruptive"
-                            android:visibility="gone"/>
-                        
+                            android:visibility="gone" />
+
                         <TextView
                             android:id="@+id/recording_timer_info"
                             style="@style/unit.info"
@@ -148,15 +134,19 @@
                 </RelativeLayout>
             </LinearLayout>
 
+            <org.hva.sensei.sensors.record.VuMeterView
+                android:id="@+id/vuMeterView"
+                android:layout_width="match_parent"
+                android:layout_height="30dip"
+                android:layout_marginTop="@dimen/activity_vertical_margin" />
+
             <ToggleButton
-            android:id="@+id/button_start"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/btn_record_img"
-            android:textOff="@string/button_start_recording"
-            android:textOn="@string/button_stop_recording"/>
-            
-           
+                android:id="@+id/button_start"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/btn_record_img"
+                android:textOff="@string/button_start_recording"
+                android:textOn="@string/button_stop_recording" />
         </LinearLayout>
 
         <LinearLayout
@@ -195,6 +185,24 @@
 
                 <EditText
                     android:id="@+id/recording_frequency"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:text="300" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/label_recording_frequency_count" />
+
+                <EditText
+                    android:id="@+id/recording_frequency_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:inputType="number"

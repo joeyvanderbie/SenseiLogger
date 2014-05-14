@@ -68,19 +68,31 @@ public class AccelerometerListener implements SensorEventListener {
             }
             
             if (now >= startTime + 5000) {
+          //  if(numSamples >= 1000){
                 samplingRate = numSamples / ((now - startTime) / 1000.0);
                 startTime = now;
                 numSamples = 0;
                 
                 accelerometerTest.displayRates();
                 Log.d("AcceleromterTest", "displayrate: "+samplingRate);
+                final ArrayList<AccelData> upload = (ArrayList<AccelData>) samples.clone();
+                //waarschijnlijk moet dit in een aparte thread omdat het teveel invloed heeft op de sampling rate
                 
-                //add samples to database
-                ads.open();
-               // ads.addAccelDataList(samples, 0, run_id);
-                ads.addAccelDataListFast(samples, 0, run_id);
-    			ads.close();
+                new Runnable() {
+					
+					@Override
+					public void run() {
+						//add samples to database
+		                ads.open();
+		               // ads.addAccelDataList(samples, 0, run_id);
+		                ads.addAccelDataListFast(upload, 0, run_id);
+		    			ads.close();
+					}
+				}.run();
+                
                 samples = new ArrayList<AccelData>();
+                Log.d("AcceleromterTest", "Uploading to database");
+
             }
 //            if(sensorTimeReference == 0l && myTimeReference == 0l) {
 //                sensorTimeReference = event.timestamp;

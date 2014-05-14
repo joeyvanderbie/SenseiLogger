@@ -22,6 +22,7 @@ import java.util.zip.ZipOutputStream;
 
 import org.hva.sensei.data.AccelData;
 import org.hva.sensei.db.AccelDataSource;
+import org.hva.sensei.db.DatabaseHelper;
 import org.hva.sensei.sensors.AccelerometerListener;
 import org.hva.sensei.sensors.UDPThread;
 import org.hva.sensei.sensors.bluetooth.BluetoothHeartRateActivity;
@@ -67,7 +68,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 	WakeLock wakeLock;
 
 	AccelerometerListener accelerometerListener;
-	private int delayInMicroseconds = 45000; // for 20Hz sampling rate
+	private int delayInMicroseconds = 45000; // for 20Hz sampling rate   SensorManager.SENSOR_DELAY_FASTEST;//
 	private boolean streamData = false;
 	Sensor mSensor;
 
@@ -162,18 +163,18 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 					e.printStackTrace();
 				}
 
-//				String backupLocation = Environment
-//						.getExternalStorageDirectory().getAbsolutePath()
-//						+ "/Sensei/backup"
-//						+ System.currentTimeMillis()
-//						+ ".zip";
-//
-//				ArrayList<String> uploadData = new ArrayList<String>();
-//				uploadData.add(backupLocation);
-//				makeZip mz = new makeZip(backupLocation);
-//				mz.addZipFile(getDatabasePath(DatabaseHelper.DATABASE_NAME)
-//						.getAbsolutePath());
-//				mz.closeZip();
+				String backupLocation = Environment
+						.getExternalStorageDirectory().getAbsolutePath()
+						+ "/Sensei/backup"
+						+ System.currentTimeMillis()
+						+ ".zip";
+
+				ArrayList<String> uploadData = new ArrayList<String>();
+				uploadData.add(backupLocation);
+				makeZip mz = new makeZip(backupLocation);
+				mz.addZipFile(getDatabasePath(DatabaseHelper.DATABASE_NAME)
+						.getAbsolutePath());
+				mz.closeZip();
 
 			}
 		});

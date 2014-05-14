@@ -44,7 +44,6 @@ public class AccelerometerListener implements SensorEventListener {
         ads = new AccelDataSource(accelerometerTest);
         ads.open();
         run_id = ads.getLastAccelRunId()+1;
-        this.run_id = run_id;
 		
     }
     

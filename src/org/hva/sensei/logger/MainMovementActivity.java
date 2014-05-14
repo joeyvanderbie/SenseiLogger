@@ -26,12 +26,12 @@ import org.hva.sensei.db.DatabaseHelper;
 import org.hva.sensei.sensors.AccelerometerListener;
 import org.hva.sensei.sensors.UDPThread;
 import org.hva.sensei.sensors.bluetooth.BluetoothHeartRateActivity;
+import org.hva.sensei.sensors.bluetooth.ShimmerListener;
 
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
@@ -61,6 +61,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 	Button button2;
 	Button button3;
 	SensorManager sensorManager;
+	ShimmerListener shimmerListener;
 	Sensor accelerometer;
 	Sensor uiAccelerometer;
 	String accelPath = Environment.getExternalStorageDirectory()
@@ -109,11 +110,14 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 		sensorManager.registerListener(accelerometerListener, accelerometer,
 				delayInMicroseconds);
 
+		shimmerListener = new ShimmerListener(MainMovementActivity.this);
+
+
 		// Register our receiver for the ACTION_SCREEN_OFF action. This will
 		// make our receiver
 		// code be called whenever the phone enters standby mode.
-		IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
-		registerReceiver(mReceiver, filter);
+		//IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+		//registerReceiver(mReceiver, filter);
 
 		PowerManager mgr = (PowerManager) MainMovementActivity.this
 				.getSystemService(Context.POWER_SERVICE);
@@ -134,8 +138,10 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 				sampling_rate_textview.setText("...");
 
 				// start_UDP_Stream();
-				accelerometerListener.startRecording();
-
+				//accelerometerListener.startRecording();
+				
+				shimmerListener.start();
+				
 				wakeLock.acquire();
 
 			}
@@ -152,11 +158,13 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 				
 				sampling_rate_textview.setText("-");
 				
-				accelerometerListener.stopRecording();
+				//accelerometerListener.stopRecording();
+				shimmerListener.stop();
 				wakeLock.release();
 				// stop_UDP_Stream();
 				try {
-					exportAcceltoCSV(accelerometerListener.run_id);
+					//exportAcceltoCSV(accelerometerListener.run_id);
+					exportAcceltoCSV(shimmerListener.run_id);
 					updateFileList();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -227,7 +235,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 	@Override
 	public void onDestroy() {
 		// Unregister our receiver.
-		unregisterReceiver(mReceiver);
+		//unregisterReceiver(mReceiver);
 
 		// Unregister from SensorManager.
 		sensorManager.unregisterListener(accelerometerListener);
@@ -274,7 +282,8 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 	public void displayRates() {
 		// button1.setEnabled(true);
 
-		sampling_rate_textview.setText(""+Math.round(accelerometerListener.getSamplingRate()));
+		//sampling_rate_textview.setText(""+Math.round(accelerometerListener.getSamplingRate()));
+		sampling_rate_textview.setText(""+Math.round(shimmerListener.getSamplingRate()));
 	}
 
 	public void exportAcceltoCSV(final int runId) throws IOException {

@@ -63,6 +63,7 @@ public class ShimmerListener {
     String bluetoothAddress="00:06:66:A0:3B:33";
     private Shimmer mShimmerDevice1 = null;
     private long startTime;
+    private long startTimeStamp = 0;
     private int numSamples;
     private double samplingRate = 0.0;
     private MainMovementActivity accelerometerTest;
@@ -132,13 +133,13 @@ public class ShimmerListener {
 //						z = formatCluster.mData;
 //					}
 					
-//					Collection<FormatCluster> datetimeFormat = objectCluster.mPropertyCluster.get("Timestamp");  // first retrieve all the possible formats for the current sensor devic
-//					datetimeFormat = objectCluster.mPropertyCluster.get("Timestamp");  // first retrieve all the possible formats for the current sensor device
-//					formatCluster = ((FormatCluster)ObjectCluster.returnFormatCluster(datetimeFormat,"CAL")); // retrieve the calibrated data
-//					if (formatCluster!=null){
-//						Log.d("CalibratedData",objectCluster.mMyName + " Datetimestamp: " + formatCluster.mData + " "+formatCluster.mUnits);
-//						timestamp = formatCluster.mData;
-//					}
+					Collection<FormatCluster> datetimeFormat = objectCluster.mPropertyCluster.get("Timestamp");  // first retrieve all the possible formats for the current sensor devic
+					datetimeFormat = objectCluster.mPropertyCluster.get("Timestamp");  // first retrieve all the possible formats for the current sensor device
+					formatCluster = ((FormatCluster)ObjectCluster.returnFormatCluster(datetimeFormat,"CAL")); // retrieve the calibrated data
+					if (formatCluster!=null){
+						Log.d("CalibratedData",objectCluster.mMyName + " Datetimestamp: " + formatCluster.mData + " "+formatCluster.mUnits);
+						timestamp = formatCluster.mData;
+					}
 					
 					
 					//update x, y, z, timestamp, datetimestamp
@@ -183,10 +184,10 @@ public class ShimmerListener {
 			            // set event timestamp to current time in milliseconds
 //			            event.timestamp = myTimeReference + 
 //			                Math.round((event.timestamp - sensorTimeReference) / 1000000.0);
-			            samples.add(new AccelData(now,x, y, z, run_id));
+			            samples.add(new AccelData((long)(startTimeStamp + timestamp),x, y, z, run_id));
 
 			            Log.d(TAG, x + " " + y + " " + z + " "+ run_id);
-			        	new UDPThread().execute(x + ", " +y + ", " + z + ", " + now + ", "+ run_id);
+			        	new UDPThread().execute(x + ", " +y + ", " + z + ", " + startTimeStamp + timestamp + ", "+ run_id);
 
             	}
                 break;
@@ -201,6 +202,7 @@ public class ShimmerListener {
                     	        Log.d("ConnectionStatus","Successful");
                     	        
                     	        startTime = System.currentTimeMillis();
+                    	        startTimeStamp = System.currentTimeMillis();
                     	        numSamples = 0;
                     	        samples = new ArrayList<AccelData>();
                     	        ads = new AccelDataSource(accelerometerTest);

@@ -22,6 +22,7 @@ import java.util.zip.ZipOutputStream;
 
 import org.hva.sensei.data.AccelData;
 import org.hva.sensei.db.AccelDataSource;
+import org.hva.sensei.db.DatabaseHelper;
 import org.hva.sensei.sensors.AccelerometerListener;
 import org.hva.sensei.sensors.UDPThread;
 import org.hva.sensei.sensors.bluetooth.BluetoothHeartRateActivity;
@@ -50,7 +51,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-public class MainActivity extends BluetoothHeartRateActivity {
+public class MainMovementActivity extends BluetoothHeartRateActivity {
 	public static DatagramSocket mSocket = null;
 	public static DatagramPacket mPacket = null;
 	TextView mIP_Adress;
@@ -67,7 +68,7 @@ public class MainActivity extends BluetoothHeartRateActivity {
 	WakeLock wakeLock;
 
 	AccelerometerListener accelerometerListener;
-	private int delayInMicroseconds = 45000; // for 20Hz sampling rate
+	private int delayInMicroseconds = 45000; // for 20Hz sampling rate   SensorManager.SENSOR_DELAY_FASTEST;//
 	private boolean streamData = false;
 	Sensor mSensor;
 
@@ -79,18 +80,18 @@ public class MainActivity extends BluetoothHeartRateActivity {
 	private static final long SCAN_PERIOD = 10000;
 
 	// BroadcastReceiver for handling ACTION_SCREEN_OFF.
-	private BroadcastReceiver mReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			// Check action just to be on the safe side.
-			if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-				// Unregisters the listener and registers it again.
-				sensorManager.unregisterListener(accelerometerListener);
-				sensorManager.registerListener(accelerometerListener,
-						accelerometer, delayInMicroseconds);
-			}
-		}
-	};
+//	private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+//		@Override
+//		public void onReceive(Context context, Intent intent) {
+//			// Check action just to be on the safe side.
+//			if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+//				// Unregisters the listener and registers it again.
+//				sensorManager.unregisterListener(accelerometerListener);
+//				sensorManager.registerListener(accelerometerListener,
+//						accelerometer, delayInMicroseconds);
+//			}
+//		}
+//	};
 
 	private TextView heart_rate;
 //	private Button connect;
@@ -111,10 +112,10 @@ public class MainActivity extends BluetoothHeartRateActivity {
 		// Register our receiver for the ACTION_SCREEN_OFF action. This will
 		// make our receiver
 		// code be called whenever the phone enters standby mode.
-		IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
-		registerReceiver(mReceiver, filter);
+//		IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+//		registerReceiver(mReceiver, filter);
 
-		PowerManager mgr = (PowerManager) MainActivity.this
+		PowerManager mgr = (PowerManager) MainMovementActivity.this
 				.getSystemService(Context.POWER_SERVICE);
 		wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
 				"SenseiWakeLock");
@@ -162,18 +163,18 @@ public class MainActivity extends BluetoothHeartRateActivity {
 					e.printStackTrace();
 				}
 
-//				String backupLocation = Environment
-//						.getExternalStorageDirectory().getAbsolutePath()
-//						+ "/Sensei/backup"
-//						+ System.currentTimeMillis()
-//						+ ".zip";
-//
-//				ArrayList<String> uploadData = new ArrayList<String>();
-//				uploadData.add(backupLocation);
-//				makeZip mz = new makeZip(backupLocation);
-//				mz.addZipFile(getDatabasePath(DatabaseHelper.DATABASE_NAME)
-//						.getAbsolutePath());
-//				mz.closeZip();
+				String backupLocation = Environment
+						.getExternalStorageDirectory().getAbsolutePath()
+						+ "/Sensei/backup"
+						+ System.currentTimeMillis()
+						+ ".zip";
+
+				ArrayList<String> uploadData = new ArrayList<String>();
+				uploadData.add(backupLocation);
+				makeZip mz = new makeZip(backupLocation);
+				mz.addZipFile(getDatabasePath(DatabaseHelper.DATABASE_NAME)
+						.getAbsolutePath());
+				mz.closeZip();
 
 			}
 		});
@@ -226,7 +227,7 @@ public class MainActivity extends BluetoothHeartRateActivity {
 	@Override
 	public void onDestroy() {
 		// Unregister our receiver.
-		unregisterReceiver(mReceiver);
+		//unregisterReceiver(mReceiver);
 
 		// Unregister from SensorManager.
 		sensorManager.unregisterListener(accelerometerListener);
@@ -307,7 +308,7 @@ public class MainActivity extends BluetoothHeartRateActivity {
 						OutputStreamWriter osw = new OutputStreamWriter(fOut);
 
 						AccelDataSource ads = new AccelDataSource(
-								MainActivity.this);
+								MainMovementActivity.this);
 						ads.open();
 						ArrayList<AccelData> allAccel = ads.getAllAccel(runId,
 								ads.getAllAccelCount(runId), 0);

@@ -3,7 +3,7 @@ package org.hva.sensei.sensors;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-import org.hva.sensei.logger.MainActivity;
+import org.hva.sensei.logger.MainMovementActivity;
 
 import android.os.AsyncTask;
 
@@ -18,14 +18,14 @@ public class UDPThread  extends AsyncTask<String, Void, Void> {
 			
 			try {
 				bytes = msensordata.getBytes("UTF-8");
-				if (MainActivity.mPacket == null || MainActivity.mSocket == null)
+				if (MainMovementActivity.mPacket == null || MainMovementActivity.mSocket == null)
 					return null ;
 				
-				MainActivity.mPacket.setData(bytes);
-				MainActivity.mPacket.setLength(bytes.length);
+				MainMovementActivity.mPacket.setData(bytes);
+				MainMovementActivity.mPacket.setLength(bytes.length);
 
 
-				MainActivity.mSocket.send(MainActivity.mPacket);
+				MainMovementActivity.mSocket.send(MainMovementActivity.mPacket);
 			} catch (UnsupportedEncodingException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.hva.sensei.data.AccelData;
 import org.hva.sensei.db.AccelDataSource;
-import org.hva.sensei.logger.MainActivity;
+import org.hva.sensei.logger.MainMovementActivity;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -17,14 +17,14 @@ public class AccelerometerListener implements SensorEventListener {
     private int numSamples;
     private boolean isActive = false;
     private double samplingRate = 0.0;
-    private MainActivity accelerometerTest;
+    private MainMovementActivity accelerometerTest;
     private ArrayList<AccelData> samples;
     private AccelDataSource ads;
     public int run_id = 0;
     private long sensorTimeReference = 0l;
     private long myTimeReference = 0l;
     
-    public AccelerometerListener(MainActivity accelerometerTest) {
+    public AccelerometerListener(MainMovementActivity accelerometerTest) {
         this.accelerometerTest = accelerometerTest;
         
     }
@@ -39,12 +39,14 @@ public class AccelerometerListener implements SensorEventListener {
     public void startRecording() {
         startTime = System.currentTimeMillis();
         numSamples = 0;
+        sensorTimeReference = 0l;
+        myTimeReference = 0l;
+        
         isActive = true;
         this.samples = new ArrayList<AccelData>();
         ads = new AccelDataSource(accelerometerTest);
         ads.open();
         run_id = ads.getLastAccelRunId()+1;
-        this.run_id = run_id;
 		
     }
     
@@ -67,32 +69,44 @@ public class AccelerometerListener implements SensorEventListener {
             	 accelerometerTest.displayRates();
             }
             
-            if (now >= startTime + 5000) {
+          //  if (now >= startTime + 5000) {
+            if(numSamples >= 100){
                 samplingRate = numSamples / ((now - startTime) / 1000.0);
                 startTime = now;
                 numSamples = 0;
                 
                 accelerometerTest.displayRates();
                 Log.d("AcceleromterTest", "displayrate: "+samplingRate);
+                final ArrayList<AccelData> upload = (ArrayList<AccelData>) samples.clone();
+                //waarschijnlijk moet dit in een aparte thread omdat het teveel invloed heeft op de sampling rate
                 
-                //add samples to database
-                ads.open();
-               // ads.addAccelDataList(samples, 0, run_id);
-                ads.addAccelDataListFast(samples, 0, run_id);
-    			ads.close();
+                new Runnable() {
+					
+					@Override
+					public void run() {
+						//add samples to database
+		                ads.open();
+		               // ads.addAccelDataList(samples, 0, run_id);
+		                ads.addAccelDataListFast(upload, 0, run_id);
+		    			ads.close();
+					}
+				}.run();
+                
                 samples = new ArrayList<AccelData>();
+                Log.d("AcceleromterTest", "Uploading to database");
+
             }
-//            if(sensorTimeReference == 0l && myTimeReference == 0l) {
-//                sensorTimeReference = event.timestamp;
-//                myTimeReference = System.currentTimeMillis();
-//            }
+            if(sensorTimeReference == 0l && myTimeReference == 0l) {
+                sensorTimeReference = event.timestamp;
+                myTimeReference = System.currentTimeMillis();
+            }
             // set event timestamp to current time in milliseconds
-//            event.timestamp = myTimeReference + 
-//                Math.round((event.timestamp - sensorTimeReference) / 1000000.0);
+            event.timestamp = myTimeReference + 
+                Math.round((event.timestamp - sensorTimeReference) / 1000000.0);
             samples.add(new AccelData(now, event.values[0], event.values[1], event.values[2], run_id));
 
-            Log.d("AcceleromterTest", event.values[0] + " " + event.values[1] + " " + event.values[2] + " " + run_id);
-        	new UDPThread().execute(event.values[0] + ", " + event.values[1] + ", " + event.values[2] + ", " + now + ", "+ run_id);
+            Log.d("AcceleromterTest", event.values[0] + " " + event.values[1] + " " + event.values[2] + " " + event.timestamp + ", "+ run_id);
+        	new UDPThread().execute(event.values[0] + ", " + event.values[1] + ", " + event.values[2] + ", " + event.timestamp + ", "+ run_id);
         }
     }
     

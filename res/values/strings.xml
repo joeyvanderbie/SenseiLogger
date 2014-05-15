@@ -28,6 +28,9 @@
     <string name="heart_rate_header">Heart rate</string>
     <string name="heart_rate_unit_bpm">bpm</string>
 
+    <!-- Record -->
+ 	<string name="button_start_recording">Start</string>
+    <string name="button_stop_recording">Stop</string>
 
     <string name="sampling_rate_unit_hz">Hz</string>
     <string name="sampling_rate_header">Sampling rate</string>
@@ -41,6 +44,7 @@
     
     <string name="label_recording_duration">Recording duration in seconds</string>
     <string name="label_recording_frequency">Recording frequency in seconds</string>
+    <string name="label_recording_frequency_count">Recording frequency </string>
     <string name="label_recording_message">Question</string>
     <string name="next_recording">Next recording in</string>
     <string name="recording_duration">Recording duration</string>

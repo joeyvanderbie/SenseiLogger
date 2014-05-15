@@ -80,18 +80,18 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 	private static final long SCAN_PERIOD = 10000;
 
 	// BroadcastReceiver for handling ACTION_SCREEN_OFF.
-	private BroadcastReceiver mReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			// Check action just to be on the safe side.
-			if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-				// Unregisters the listener and registers it again.
-				sensorManager.unregisterListener(accelerometerListener);
-				sensorManager.registerListener(accelerometerListener,
-						accelerometer, delayInMicroseconds);
-			}
-		}
-	};
+//	private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+//		@Override
+//		public void onReceive(Context context, Intent intent) {
+//			// Check action just to be on the safe side.
+//			if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+//				// Unregisters the listener and registers it again.
+//				sensorManager.unregisterListener(accelerometerListener);
+//				sensorManager.registerListener(accelerometerListener,
+//						accelerometer, delayInMicroseconds);
+//			}
+//		}
+//	};
 
 	private TextView heart_rate;
 //	private Button connect;
@@ -112,8 +112,8 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 		// Register our receiver for the ACTION_SCREEN_OFF action. This will
 		// make our receiver
 		// code be called whenever the phone enters standby mode.
-		IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
-		registerReceiver(mReceiver, filter);
+//		IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+//		registerReceiver(mReceiver, filter);
 
 		PowerManager mgr = (PowerManager) MainMovementActivity.this
 				.getSystemService(Context.POWER_SERVICE);
@@ -227,7 +227,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 	@Override
 	public void onDestroy() {
 		// Unregister our receiver.
-		unregisterReceiver(mReceiver);
+		//unregisterReceiver(mReceiver);
 
 		// Unregister from SensorManager.
 		sensorManager.unregisterListener(accelerometerListener);

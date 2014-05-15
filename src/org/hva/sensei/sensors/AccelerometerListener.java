@@ -39,6 +39,9 @@ public class AccelerometerListener implements SensorEventListener {
     public void startRecording() {
         startTime = System.currentTimeMillis();
         numSamples = 0;
+        sensorTimeReference = 0l;
+        myTimeReference = 0l;
+        
         isActive = true;
         this.samples = new ArrayList<AccelData>();
         ads = new AccelDataSource(accelerometerTest);
@@ -93,17 +96,17 @@ public class AccelerometerListener implements SensorEventListener {
                 Log.d("AcceleromterTest", "Uploading to database");
 
             }
-//            if(sensorTimeReference == 0l && myTimeReference == 0l) {
-//                sensorTimeReference = event.timestamp;
-//                myTimeReference = System.currentTimeMillis();
-//            }
+            if(sensorTimeReference == 0l && myTimeReference == 0l) {
+                sensorTimeReference = event.timestamp;
+                myTimeReference = System.currentTimeMillis();
+            }
             // set event timestamp to current time in milliseconds
-//            event.timestamp = myTimeReference + 
-//                Math.round((event.timestamp - sensorTimeReference) / 1000000.0);
+            event.timestamp = myTimeReference + 
+                Math.round((event.timestamp - sensorTimeReference) / 1000000.0);
             samples.add(new AccelData(now, event.values[0], event.values[1], event.values[2], run_id));
 
-            Log.d("AcceleromterTest", event.values[0] + " " + event.values[1] + " " + event.values[2] + " " + run_id);
-        	new UDPThread().execute(event.values[0] + ", " + event.values[1] + ", " + event.values[2] + ", " + now + ", "+ run_id);
+            Log.d("AcceleromterTest", event.values[0] + " " + event.values[1] + " " + event.values[2] + " " + event.timestamp + ", "+ run_id);
+        	new UDPThread().execute(event.values[0] + ", " + event.values[1] + ", " + event.values[2] + ", " + event.timestamp + ", "+ run_id);
         }
     }
     

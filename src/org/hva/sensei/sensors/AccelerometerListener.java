@@ -100,6 +100,8 @@ public class AccelerometerListener implements SensorEventListener {
             // set event timestamp to current time in milliseconds
 //            event.timestamp = myTimeReference + 
 //                Math.round((event.timestamp - sensorTimeReference) / 1000000.0);
+            
+            //dit moet misschien toch de code hierboven zijn
             samples.add(new AccelData(now, event.values[0], event.values[1], event.values[2], run_id));
 
             Log.d("AcceleromterTest", event.values[0] + " " + event.values[1] + " " + event.values[2] + " " + run_id);

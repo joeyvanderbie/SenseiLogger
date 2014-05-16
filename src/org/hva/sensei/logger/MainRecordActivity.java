@@ -12,16 +12,22 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import org.hva.sensei.sensors.record.AudioRecorder;
+import org.hva.sensei.sensors.record.ToneGenerator;
 import org.hva.sensei.sensors.record.VuMeterView;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
+import android.media.AudioTrack.OnPlaybackPositionUpdateListener;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
@@ -57,6 +63,8 @@ public class MainRecordActivity extends Activity {
 	private int recording_frequency = 5;
 	private int recording_frequency_count = 5;
 	private int current_frequency_count = 0;
+
+    Handler audioHandler = new Handler();
 
 	class RecordTask extends TimerTask {
 		public void run() {
@@ -130,7 +138,8 @@ public class MainRecordActivity extends Activity {
 
 		@Override
 		public void onDone(String utteranceId) {
-				onClickRecord(true);
+			ToneGenerator tone = new ToneGenerator();
+			playBeepAndStartRecording(8000, tone.genTone());
 		}
 
 		@Override
@@ -147,6 +156,9 @@ public class MainRecordActivity extends Activity {
 		
 		
 	}
+	
+	
+	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -306,13 +318,19 @@ public class MainRecordActivity extends Activity {
 //			record_button.setEnabled(false);
 
 			try {
+				
+				
 				if(recordingTimer != null){
 					recordingTimer.cancel();
 				}
 				if(mRecorder.isActive()){
 					mRecorder.stop();
-				}
 
+					ToneGenerator tone = new ToneGenerator();
+					tone.playSound(8000, tone.genTone());
+				}
+				
+				
 				// ToggleButton playBtn = (ToggleButton)
 				// findViewById(R.id.btnPlayLastRecord);
 				// playBtn.setEnabled(true);
@@ -364,5 +382,21 @@ public class MainRecordActivity extends Activity {
 			files.addView(b);
 		}
 	}
+	
+	 public void playBeepAndStartRecording(int sampleRate, byte[] generatedSnd){
+	        final AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
+	        		sampleRate, AudioFormat.CHANNEL_CONFIGURATION_MONO,
+	                AudioFormat.ENCODING_PCM_16BIT, generatedSnd.length,
+	                AudioTrack.MODE_STATIC);
+
+	        audioTrack.write(generatedSnd, 0, generatedSnd.length);
+	        audioTrack.play();
+	        
+	        audioHandler.postDelayed(new Runnable(){
+	            public void run() {
+	            	onClickRecord(true);
+	          }}, generatedSnd.length / sampleRate * 1000);
+
+	    }
 
 }

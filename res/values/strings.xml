@@ -50,6 +50,7 @@
     <string name="recording_duration">Recording duration</string>
     <string name="time_unit_minutes">minutes</string>
     <string name="time_unit_seconds">seconds</string>
+    <string name="voice_question">How are you feeling?</string>
        
     
      <string name="error_invalidaddr">Invalid IP address</string>

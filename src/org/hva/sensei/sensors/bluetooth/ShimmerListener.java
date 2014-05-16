@@ -74,7 +74,7 @@ public class ShimmerListener {
     
     public ShimmerListener(MainMovementActivity activ){
     	this.accelerometerTest = activ;
-        mShimmerDevice1 = new Shimmer(activ, mHandler,"RightArm", 51.2, 0, 0, Shimmer.SENSOR_ACCEL, false);  
+        mShimmerDevice1 = new Shimmer(activ, mHandler,"RightArm", 100, 0, 0, Shimmer.SENSOR_ACCEL, false);  
 
     }
     

@@ -68,7 +68,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 	WakeLock wakeLock;
 
 	AccelerometerListener accelerometerListener;
-	private int delayInMicroseconds = 45000; // for 20Hz sampling rate   SensorManager.SENSOR_DELAY_FASTEST;//
+	private int delayInMicroseconds = SensorManager.SENSOR_DELAY_FASTEST;//45000; // for 20Hz sampling rate   
 	private boolean streamData = false;
 	Sensor mSensor;
 
@@ -103,7 +103,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 
 		sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 		accelerometer = sensorManager
-				.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+				.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
 		accelerometerListener = new AccelerometerListener(this);
 		sensorManager.registerListener(accelerometerListener, accelerometer,

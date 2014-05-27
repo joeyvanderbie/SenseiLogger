@@ -60,7 +60,8 @@ import com.shimmerresearch.driver.ObjectCluster;
 
 public class ShimmerListener {
     /** Called when the activity is first created. */
-    String bluetoothAddress="00:06:66:A0:3B:33";
+    //String bluetoothAddress="00:06:66:A0:3B:33";
+    String bluetoothAddress="00:06:66:A0:3A:4F";
     private Shimmer mShimmerDevice1 = null;
     private long startTime;
     private long startTimeStamp = 0;

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Coach -->
+    <string name="app_name_coach">Beyond Glass</string>
+    <string name="label_show_instructions">Show instructions</string>
+    
+    <!-- Instructions -->
+    <string name="stimulus_ga_harder">De volgende stimulus betekent ‘ga harder’</string>
+    <string name="stimulus_blijft_gelijk">De volgende stimulus betekent ‘blijft gelijk’</string>
+    <string name="stimulus_ga_zachter">De volgende stimulus betekent ‘ga zachter’</string>
+    <string name="stimulus_generiek">Volgende stimulus....</string>
+   
+</resources>

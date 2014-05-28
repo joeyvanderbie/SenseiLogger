@@ -21,8 +21,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.hva.sensei.data.AccelData;
+import org.hva.sensei.data.HeartRateData;
 import org.hva.sensei.db.AccelDataSource;
 import org.hva.sensei.db.DatabaseHelper;
+import org.hva.sensei.db.HeartRateDataSource;
 import org.hva.sensei.sensors.AccelerometerListener;
 import org.hva.sensei.sensors.UDPThread;
 import org.hva.sensei.sensors.bluetooth.BluetoothHeartRateActivity;
@@ -66,9 +68,10 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 	String accelPath = Environment.getExternalStorageDirectory()
 			+ "/Sensei/Accelerometer";
 	WakeLock wakeLock;
+	boolean recording = false;
 
 	AccelerometerListener accelerometerListener;
-	private int delayInMicroseconds = SensorManager.SENSOR_DELAY_FASTEST;//45000; // for 20Hz sampling rate   
+	private int delayInMicroseconds = 50000; // for 20Hz sampling rate   SensorManager.SENSOR_DELAY_FASTEST;//
 	private boolean streamData = false;
 	Sensor mSensor;
 
@@ -96,6 +99,8 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 	private TextView heart_rate;
 //	private Button connect;
 	
+	private HeartRateDataSource hds;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -108,6 +113,9 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 		accelerometerListener = new AccelerometerListener(this);
 		sensorManager.registerListener(accelerometerListener, accelerometer,
 				delayInMicroseconds);
+		
+		   hds = new HeartRateDataSource(this);
+	
 
 		// Register our receiver for the ACTION_SCREEN_OFF action. This will
 		// make our receiver
@@ -137,6 +145,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 				accelerometerListener.startRecording();
 
 				wakeLock.acquire();
+				recording = true;
 
 			}
 		});
@@ -155,13 +164,14 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 				accelerometerListener.stopRecording();
 				wakeLock.release();
 				// stop_UDP_Stream();
-				try {
-					exportAcceltoCSV(accelerometerListener.run_id);
-					updateFileList();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+//				try {
+//					exportAcceltoCSV(accelerometerListener.run_id);
+//					updateFileList();
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+				recording = false;
 
 				String backupLocation = Environment
 						.getExternalStorageDirectory().getAbsolutePath()
@@ -175,7 +185,6 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 				mz.addZipFile(getDatabasePath(DatabaseHelper.DATABASE_NAME)
 						.getAbsolutePath());
 				mz.closeZip();
-
 			}
 		});
 
@@ -540,7 +549,14 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 			Log.d(TAG, "Hear rate data: "+data);
 			if(heart_rate != null){
 				heart_rate.setText(data);
-				new UDPThread().execute(data + ", " + System.currentTimeMillis());
+				
+				
+				if(recording){
+					hds.open();
+					hds.addHeartRateSilent(new HeartRateData(Long.parseLong(data), System.currentTimeMillis(), accelerometerListener.run_id));
+					hds.close();
+					//new UDPThread().execute(data + ", " + System.currentTimeMillis());
+				}
 			}
 		}
 	}
@@ -551,6 +567,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 		if(heart_rate != null){
 			heart_rate.setText("-");
 		}
+		
 		//connect.setVisibility(View.VISIBLE);
 	}
 	

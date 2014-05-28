@@ -147,12 +147,14 @@ public class BluetoothHeartRateActivity extends Activity{
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(mGattUpdateReceiver);
+       // unregisterReceiver(mGattUpdateReceiver);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        unregisterReceiver(mGattUpdateReceiver);
+
         unbindService(mServiceConnection);
         mBluetoothLeService = null;
     }

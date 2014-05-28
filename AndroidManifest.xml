@@ -39,6 +39,16 @@
         android:icon="@drawable/ic_launcher_movement"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+           <activity
+            android:name="org.hva.sensei.coach.beacon.MainActivity"
+            android:icon="@drawable/ic_launcher_coach"
+            android:label="@string/app_name_coach"
+            android:screenOrientation="portrait" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
          <activity
             android:name="org.hva.sensei.logger.MainCoachActivity"
             android:icon="@drawable/ic_launcher_coach"
@@ -49,28 +59,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="org.hva.sensei.logger.MainMovementActivity"
-            android:icon="@drawable/ic_launcher_movement"
-            android:label="@string/app_name_sim"
-            android:screenOrientation="portrait" >
-              <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name="org.hva.sensei.logger.MainRecordActivity"
-            android:icon="@drawable/ic_launcher_voice"
-            android:label="@string/app_name_voice"
-            android:screenOrientation="portrait" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
         <service
-            android:name="org.hva.sensei.sensors.bluetooth.BluetoothLeService"
+            android:name="org.hva.sensei.coach.configuring.BluetoothLeService"
             android:enabled="true" />
     </application>
 

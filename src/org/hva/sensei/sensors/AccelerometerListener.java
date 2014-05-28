@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.hva.sensei.data.AccelData;
 import org.hva.sensei.db.AccelDataSource;
+import org.hva.sensei.db.HeartRateDataSource;
 import org.hva.sensei.logger.MainMovementActivity;
 
 import android.hardware.Sensor;
@@ -20,6 +21,7 @@ public class AccelerometerListener implements SensorEventListener {
     private MainMovementActivity accelerometerTest;
     private ArrayList<AccelData> samples;
     private AccelDataSource ads;
+    private HeartRateDataSource hds;
     public int run_id = 0;
     private long sensorTimeReference = 0l;
     private long myTimeReference = 0l;
@@ -47,6 +49,9 @@ public class AccelerometerListener implements SensorEventListener {
         ads = new AccelDataSource(accelerometerTest);
         ads.open();
         run_id = ads.getLastAccelRunId()+1;
+        
+        hds = new HeartRateDataSource(accelerometerTest);
+        
 		
     }
     
@@ -105,8 +110,11 @@ public class AccelerometerListener implements SensorEventListener {
                 Math.round((event.timestamp - sensorTimeReference) / 1000000.0);
             samples.add(new AccelData(now, event.values[0], event.values[1], event.values[2], run_id));
 
-            Log.d("AcceleromterTest", event.values[0] + " " + event.values[1] + " " + event.values[2] + " " + event.timestamp + ", "+ run_id);
-        	new UDPThread().execute(event.values[0] + ", " + event.values[1] + ", " + event.values[2] + ", " + event.timestamp + ", "+ run_id);
+            hds.open();
+            int heartrate = hds.getLastHeartRate(run_id);
+            hds.close();
+            Log.d("AcceleromterTest", event.values[0] + " " + event.values[1] + " " + event.values[2] + " " + event.timestamp + ", "+ heartrate);
+        	new UDPThread().execute(event.values[0] + ", " + event.values[1] + ", " + event.values[2] + ", " + event.timestamp + ", "+ heartrate);
         }
     }
     

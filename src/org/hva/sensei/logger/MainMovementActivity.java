@@ -22,9 +22,11 @@ import java.util.zip.ZipOutputStream;
 
 import org.hva.sensei.data.AccelData;
 import org.hva.sensei.data.HeartRateData;
+import org.hva.sensei.data.LocationData;
 import org.hva.sensei.db.AccelDataSource;
 import org.hva.sensei.db.DatabaseHelper;
 import org.hva.sensei.db.HeartRateDataSource;
+import org.hva.sensei.db.LocationDataSource;
 import org.hva.sensei.sensors.AccelerometerListener;
 import org.hva.sensei.sensors.LocationUtils;
 import org.hva.sensei.sensors.bluetooth.BluetoothHeartRateActivity;
@@ -128,6 +130,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 	private HeartRateDataSource hds;
 	private LinearLayout map_layout;
 	private GoogleMap mMap;
+	private  LocationDataSource lds;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -887,6 +890,9 @@ GooglePlayServicesClient.OnConnectionFailedListener {
         }
         
         //update location in DB
+        lds.open();
+       lds.add(new LocationData(location, accelerometerListener.run_id));
+       lds.close();
 
     }
     
@@ -1004,7 +1010,8 @@ GooglePlayServicesClient.OnConnectionFailedListener {
         mUpdatesRequested = true;
         map_layout.setVisibility(View.VISIBLE);
         //mMap.setMyLocationEnabled(true);
-        
+
+       lds = new LocationDataSource(this);
         if (servicesConnected()) {
             startPeriodicUpdates();
         }

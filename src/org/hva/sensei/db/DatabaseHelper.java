@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseHelper extends SQLiteOpenHelper {
 	// If you change the database schema, you must increment the database
 	// version.
-	public static final int DATABASE_VERSION = 2;
+	public static final int DATABASE_VERSION = 3;
 	public static final String DATABASE_NAME = "SenseiLogger.db";
 
 	public DatabaseHelper(Context context) {
@@ -23,7 +23,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 //		db.execSQL(Database.SQL_CREATE_GYRO);
 //		db.execSQL(Database.SQL_CREATE_ROUTE_RUN);
 //		db.execSQL(Database.SQL_CREATE_ROUTE);
-//		db.execSQL(Database.SQL_CREATE_LOCATION);
+		db.execSQL(Database.SQL_CREATE_LOCATION);
 //		db.execSQL(Database.SQL_CREATE_QUEUE);
 		db.execSQL(Database.SQL_CREATE_HEARTRATE);
 	}
@@ -39,7 +39,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 //		db.execSQL(Database.SQL_DELETE_ROUTE_RUN);
 //		db.execSQL(Database.SQL_DELETE_ROUTE);
 //		db.execSQL(Database.SQL_DELETE_GYRO);
-//		db.execSQL(Database.SQL_DELETE_LOCATION);
+		db.execSQL(Database.SQL_DELETE_LOCATION);
 //		db.execSQL(Database.SQL_DELETE_QUEUE);
 		db.execSQL(Database.SQL_DELETE_HEARTRATE);
 		onCreate(db);
@@ -52,13 +52,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 		db.execSQL(Database.SQL_DELETE_MOVEMENT);
 		db.execSQL(Database.SQL_DELETE_HEARTRATE);
 //		db.execSQL(Database.SQL_DELETE_GYRO);
-//		db.execSQL(Database.SQL_DELETE_LOCATION);
+		db.execSQL(Database.SQL_DELETE_LOCATION);
 //		
 		db.execSQL(Database.SQL_CREATE_MOVEMENT);
 		db.execSQL(Database.SQL_CREATE_HEARTRATE);
-
 //		db.execSQL(Database.SQL_CREATE_GYRO);
-//		db.execSQL(Database.SQL_CREATE_LOCATION);
+		db.execSQL(Database.SQL_CREATE_LOCATION);
 	}
 
 	public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {

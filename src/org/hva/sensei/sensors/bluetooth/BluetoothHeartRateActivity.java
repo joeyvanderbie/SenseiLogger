@@ -20,10 +20,11 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.widget.Toast;
 
-public class BluetoothHeartRateActivity extends Activity{
+public class BluetoothHeartRateActivity extends FragmentActivity{
 
 	protected boolean mConnected;
 	protected String mDeviceAddress = "E5:86:D2:0E:8E:E6";

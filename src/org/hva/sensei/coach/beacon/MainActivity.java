@@ -97,7 +97,7 @@ public class MainActivity extends Activity implements beaconListener, BeaconConn
 
 	@Override
 	public void beaconFound(AbstractBeacon b) {
-		if (b.getDevice().getAddress().trim().equals("20:CD:39:AD:67:ED")) {
+		if (b.getDevice().getAddress().trim().equals("20:CD:39:AD:68:B8")) {
 			statusLabel.setText("Found your bracelet");
 			GlimwormBeacon glb = (GlimwormBeacon)b;
 			battery.setText("Battery level:"+glb.getBatteryLevel()+"%");

@@ -195,4 +195,18 @@ public class BeaconConnection {
 		transmitting = false;
 		transmitQueue.remove(0);
 	}
+	
+	public void transmitHexWithoutResponse(byte data[]) {
+
+		if ( !transmitting) {
+			if (mBluetoothLeService != null && characteristicTX != null) {
+				characteristicTX.setValue(data);
+				mBluetoothLeService.writeCharacteristic(characteristicTX);
+				
+				mBluetoothLeService.setCharacteristicNotification(characteristicRX, true);
+				transmitting = true;
+			}
+		}
+		transmitting = false;
+	}
 }

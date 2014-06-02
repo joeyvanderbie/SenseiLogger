@@ -1,7 +1,5 @@
 package org.hva.sensei.logger;
 
-import java.util.ArrayList;
-
 import org.hva.sensei.coach.beacon.AbstractBeacon;
 import org.hva.sensei.coach.beacon.BeaconMessage;
 import org.hva.sensei.coach.beacon.GlimwormBeacon;
@@ -24,9 +22,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.ToggleButton;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 
 public class MainCoachActivity extends FragmentActivity implements
 		beaconListener, BeaconConnectionListener {
@@ -71,6 +69,11 @@ public class MainCoachActivity extends FragmentActivity implements
 	TextView battery = null;
 	
 	final String TAG = "MainCoachActivity";
+	
+	String beaconID = "20:CD:39:AD:68:B8";
+	SeekBar start_intensity_seekbar,stop_intensity_seekbar,duration_seekbar;
+	int start_intensity, stop_intensity, vibrate_duration;
+	TextView start_intensity_label, stop_intensity_label, vibrate_duration_label;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -122,40 +125,93 @@ public class MainCoachActivity extends FragmentActivity implements
 		if (savedInstanceState == null) {
 		}
 
-		SeekBar seek = (SeekBar) findViewById(R.id.vibratespeed);
-		seek.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-
-			int seekbar_value = 0;
-
+		
+		start_intensity_label  = (TextView) findViewById(R.id.startspeed_label);
+		stop_intensity_label  = (TextView) findViewById(R.id.stopspeed_label);
+		vibrate_duration_label  = (TextView) findViewById(R.id.vibrateduration_label);
+		
+		start_intensity_seekbar = (SeekBar) findViewById(R.id.startspeed);
+		start_intensity_seekbar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 			@Override
 			public void onProgressChanged(SeekBar seekBar, int progress,
 					boolean fromUser) {
-				seekbar_value = progress;
-				onStopTrackingTouch(seekBar);
+				start_intensity = progress;
+				start_intensity_label.setText(""+start_intensity);
 			}
 
 			@Override
 			public void onStartTrackingTouch(SeekBar seekBar) {
 				// TODO Auto-generated method stub
-
+				
 			}
 
-			/*
-			 * (non-Javadoc)
-			 * 
-			 * @see
-			 * android.widget.SeekBar.OnSeekBarChangeListener#onStopTrackingTouch
-			 * (android.widget.SeekBar) 0 = uit 1 = aan 2-9 = pwm 2 laagst, 9
-			 * hoogst
-			 */
 			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
-				beaconConnection.transmitDataWithoutResponse("AT+PIO2"
-						+ seekbar_value);
+				// TODO Auto-generated method stub
+				
 			}
 
 		});
+		
+		stop_intensity_seekbar = (SeekBar) findViewById(R.id.endspeed);
+		stop_intensity_seekbar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progress,
+					boolean fromUser) {
+				stop_intensity = progress;
 
+				stop_intensity_label.setText(""+stop_intensity);
+			}
+
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar) {
+				// TODO Auto-generated method stub
+				
+			}
+
+		});
+		
+		duration_seekbar = (SeekBar) findViewById(R.id.durationseekbar);
+		duration_seekbar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+			@Override
+			public void onProgressChanged(SeekBar seekBar, int progress,
+					boolean fromUser) {
+				vibrate_duration = progress;
+
+				vibrate_duration_label.setText(""+vibrate_duration);
+			}
+
+			@Override
+			public void onStartTrackingTouch(SeekBar seekBar) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void onStopTrackingTouch(SeekBar seekBar) {
+				// TODO Auto-generated method stub
+				
+			}
+
+		});
+		
+		Button vibrateButton = (Button) this.findViewById(R.id.vibrate);
+		vibrateButton.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				vibrate(start_intensity, stop_intensity, vibrate_duration);
+				
+			}
+		});
+
+		
 	}
 
 	private void startCoach(boolean start) {
@@ -450,13 +506,13 @@ public class MainCoachActivity extends FragmentActivity implements
 		switch (stimulus_type) {
 		case BLIJFT_GELIJK:
 			vibrator.vibrate(stimulus_ms);
-			vibrate(stimulus_ms);
+			vibrate(180, 180, (int) stimulus_ms);
 			break;
 		case GA_ZACHTER:
-			vibrate(stimulus_ms, 9, 5);
+			vibrate(255, 0, (int)stimulus_ms);
 			break;
 		case GA_HARDER:
-			vibrate(stimulus_ms, 2, 5);
+			vibrate(0, 255, (int)stimulus_ms);
 			break;
 		}
 		return true;
@@ -466,7 +522,7 @@ public class MainCoachActivity extends FragmentActivity implements
 
 	@Override
 	public void beaconFound(AbstractBeacon b) {
-		if (b.getDevice().getAddress().trim().equals("20:CD:39:AD:67:ED")) {
+		if (b.getDevice().getAddress().trim().equals(beaconID)) {
 			statusLabel.setText("Found your bracelet");
 			GlimwormBeacon glb = (GlimwormBeacon) b;
 			battery.setText("Battery level:" + glb.getBatteryLevel() + "%");
@@ -507,130 +563,163 @@ public class MainCoachActivity extends FragmentActivity implements
 						.getAddress().trim());
 				beaconConnection.addListener(this, 0);
 				beaconConnection.Connect();
+			}else{
+				if(leScanner != null){
+					leScanner.stopScan();
+				}
+				beaconConnection = new BeaconConnection(this, beaconID);
+				beaconConnection.addListener(this, 0);
+				beaconConnection.Connect();
 			}
 		}
 	}
 
-	public void vibrate(View v) {
-		if (connected) {
-			if (!vibrating) {
-				beaconConnection.transmitDataWithoutResponse("AT+PIO21");
-				statusLabel.setText("Shaking your bracelet");
-				vibrating = true;
-			} else {
-				beaconConnection.transmitDataWithoutResponse("AT+PIO20");
-				statusLabel.setText("Connected to your bracelet");
-				vibrating = false;
-			}
-		}
-	}
-
-	private void vibrate(long ms) {
-		stimulusHandler.post(new Runnable() {
-
-			@Override
-			public void run() {
-				if (connected){
-					beaconConnection.transmitDataWithoutResponse("AT+PIO21");
-				}
-				statusLabel.setText("Shaking your bracelet");
-				vibrating = true;
-			}
-		});
-
-		stimulusHandler.postDelayed(new Runnable() {
-
-			@Override
-			public void run() {
-				if (connected){
-					beaconConnection.transmitDataWithoutResponse("AT+PIO20");
-				}
-				statusLabel.setText("Connected to your bracelet");
-				vibrating = false;
-			}
-		}, ms);
-
-	}
+//	public void vibrate(View v) {
+//		if (connected) {
+//			if (!vibrating) {
+//				beaconConnection.transmitDataWithoutResponse("AT+PIO21");
+//				statusLabel.setText("Shaking your bracelet");
+//				vibrating = true;
+//			} else {
+//				beaconConnection.transmitDataWithoutResponse("AT+PIO20");
+//				statusLabel.setText("Connected to your bracelet");
+//				vibrating = false;
+//			}
+//		}
+//	}
+//
+//	private void vibrate(long ms) {
+//		stimulusHandler.post(new Runnable() {
+//
+//			@Override
+//			public void run() {
+//				if (connected){
+//					beaconConnection.transmitDataWithoutResponse("AT+PIO21");
+//				}
+//				statusLabel.setText("Shaking your bracelet");
+//				vibrating = true;
+//			}
+//		});
+//
+//		stimulusHandler.postDelayed(new Runnable() {
+//
+//			@Override
+//			public void run() {
+//				if (connected){
+//					beaconConnection.transmitDataWithoutResponse("AT+PIO20");
+//				}
+//				statusLabel.setText("Connected to your bracelet");
+//				vibrating = false;
+//			}
+//		}, ms);
+//
+//	}
 
 	// intensity_start en _end kan van 1-9, 0 is uit
-	private void vibrate(long ms, int intensity_start, int intensity_end) {
-		int steps = (Math.abs(intensity_start - intensity_end) + 1);
-		final long ms_per_intensity = ms / steps;
-
-		if (intensity_start < intensity_end) {
-			for (int i = 0; i < steps; i++) {
-				int current_step = intensity_start + i;
-				vibrate(current_step, ms_per_intensity, ms_per_intensity * i);
-				Log.d(TAG, "intensity:"+current_step + " ms_per_intensity:"+ms_per_intensity);
-			}
-		} else {
-			for (int i = 0; i < steps; i++) {
-				int current_step = intensity_start - i;
-				vibrate(current_step, ms_per_intensity, ms_per_intensity * i);
-				Log.d(TAG, "intensity:"+current_step + " ms_per_intensity:"+ms_per_intensity);
-			}
+//	private void vibrate(long ms, int intensity_start, int intensity_end) {
+//		int steps = (Math.abs(intensity_start - intensity_end) + 1);
+//		final long ms_per_intensity = ms / steps;
+//
+//		if (intensity_start < intensity_end) {
+//			for (int i = 0; i < steps; i++) {
+//				int current_step = intensity_start + i;
+//				vibrate(current_step, ms_per_intensity, ms_per_intensity * i);
+//				Log.d(TAG, "intensity:"+current_step + " ms_per_intensity:"+ms_per_intensity);
+//			}
+//		} else {
+//			for (int i = 0; i < steps; i++) {
+//				int current_step = intensity_start - i;
+//				vibrate(current_step, ms_per_intensity, ms_per_intensity * i);
+//				Log.d(TAG, "intensity:"+current_step + " ms_per_intensity:"+ms_per_intensity);
+//			}
+//		}
+//
+//	}
+	
+//	private void vibrate(final int intensity, final long ms, long start_ms) {
+//		stimulusHandler.postDelayed(new Runnable() {
+//
+//			@Override
+//			public void run() {
+//				if (connected){
+//					Log.d(TAG, "Vibrate at intensity:"+intensity + " duraction:"+ms);
+//					beaconConnection.transmitDataWithoutResponse("AT+PIO2"
+//							+ intensity);
+//				}
+//				statusLabel.setText("Shaking your bracelet");
+//				vibrating = true;
+//				vibrator.vibrate(ms);
+//			}
+//		}, start_ms);
+//
+//		stimulusHandler.postDelayed(new Runnable() {
+//
+//			@Override
+//			public void run() {
+//				if (connected){
+//
+//					Log.d(TAG, "Stop vibrate at intensity:"+intensity);
+//				beaconConnection.transmitDataWithoutResponse("AT+PIO20");
+//				}
+//				statusLabel.setText("Connected to your bracelet");
+//				vibrating = false;
+//			}
+//		}, ms + start_ms);
+//	}
+	
+//	private void vibrate(final int intensity, final long ms) {
+//		stimulusHandler.post(new Runnable() {
+//
+//			@Override
+//			public void run() {
+//				if (connected){
+//					beaconConnection.transmitDataWithoutResponse("AT+PIO2"
+//							+ intensity);
+//				statusLabel.setText("Shaking your bracelet");
+//				}
+//				vibrating = true;
+//				vibrator.vibrate(ms);
+//			}
+//		});
+//
+//		stimulusHandler.postDelayed(new Runnable() {
+//
+//			@Override
+//			public void run() {
+//				if (connected){
+//					beaconConnection.transmitDataWithoutResponse("AT+PIO20");
+//				}
+//				statusLabel.setText("Connected to your bracelet");
+//				vibrating = false;
+//			}
+//		}, ms);
+//
+//	}
+	
+	/*
+	 * start, stop 0...255 intensity of vibrate
+	 */
+	public void vibrate(int start,int stop,int duration) {
+		if (connected) {
+		//	beaconConnection.transmitDataWithoutResponse(ttv.getText().toString());
+			byte bytearr[] = new byte[8];
+			bytearr[0] = '0';
+			bytearr[1] = '1';
+			bytearr[2] = '1';
+			bytearr[3] = '1';
+			bytearr[4] = (byte) (start & 0xFF);
+			bytearr[5] = (byte) (stop & 0xFF);
+			bytearr[6] = (byte) ((duration>> 8) & 0xFF);
+			bytearr[7] = (byte) (duration & 0xFF);
+			beaconConnection.transmitHexWithoutResponse(bytearr);
+			System.out.println("Sending: "+new String(bytearr) );
+				System.out.println(((int)bytearr[4]&0xFF)+"");
+				System.out.println(((int)bytearr[5]&0xFF)+"");
+				System.out.println(      ((bytearr[6]&0xFF)<<8| (bytearr[7]&0xFF))            +"");
+				System.out.println("DONE");
+		
+			// 30 31 31 31 FF 20 0B B8
 		}
-
-	}
-	
-	private void vibrate(final int intensity, final long ms, long start_ms) {
-		stimulusHandler.postDelayed(new Runnable() {
-
-			@Override
-			public void run() {
-				if (connected){
-					Log.d(TAG, "Vibrate at intensity:"+intensity + " duraction:"+ms);
-					beaconConnection.transmitDataWithoutResponse("AT+PIO2"
-							+ intensity);
-				}
-				statusLabel.setText("Shaking your bracelet");
-				vibrating = true;
-				vibrator.vibrate(ms);
-			}
-		}, start_ms);
-
-		stimulusHandler.postDelayed(new Runnable() {
-
-			@Override
-			public void run() {
-				if (connected){
-
-					Log.d(TAG, "Stop vibrate at intensity:"+intensity);
-				beaconConnection.transmitDataWithoutResponse("AT+PIO20");
-				}
-				statusLabel.setText("Connected to your bracelet");
-				vibrating = false;
-			}
-		}, ms + start_ms);
-	}
-	
-	private void vibrate(final int intensity, final long ms) {
-		stimulusHandler.post(new Runnable() {
-
-			@Override
-			public void run() {
-				if (connected){
-					beaconConnection.transmitDataWithoutResponse("AT+PIO2"
-							+ intensity);
-				statusLabel.setText("Shaking your bracelet");
-				}
-				vibrating = true;
-				vibrator.vibrate(ms);
-			}
-		});
-
-		stimulusHandler.postDelayed(new Runnable() {
-
-			@Override
-			public void run() {
-				if (connected){
-					beaconConnection.transmitDataWithoutResponse("AT+PIO20");
-				}
-				statusLabel.setText("Connected to your bracelet");
-				vibrating = false;
-			}
-		}, ms);
-
 	}
 
 	public void leach(View v) {
@@ -684,16 +773,15 @@ public class MainCoachActivity extends FragmentActivity implements
 
 	}
 
-	boolean led1on = false, led2on = false, led3on = false, led4on = false,
-			led5on = false, led6on = false, led7on = false, led8on = false;
+	boolean led1on = false, led2on = false, led3on = false;
 
 	public void ledOne(View v) {
 		if (connected) {
 			if (!led1on) {
-				beaconConnection.transmitData("AT+PIO31");
+				beaconConnection.transmitData("AT+PIOB1");
 				led1on = true;
 			} else {
-				beaconConnection.transmitData("AT+PIO30");
+				beaconConnection.transmitData("AT+PIOB0");
 				led1on = false;
 			}
 		}
@@ -702,10 +790,10 @@ public class MainCoachActivity extends FragmentActivity implements
 	public void ledTwo(View v) {
 		if (connected) {
 			if (!led2on) {
-				beaconConnection.transmitData("AT+PIO41");
+				beaconConnection.transmitData("AT+PIO71");
 				led2on = true;
 			} else {
-				beaconConnection.transmitData("AT+PIO40");
+				beaconConnection.transmitData("AT+PIO70");
 				led2on = false;
 			}
 		}
@@ -714,73 +802,14 @@ public class MainCoachActivity extends FragmentActivity implements
 	public void ledThree(View v) {
 		if (connected) {
 			if (!led3on) {
-				beaconConnection.transmitData("AT+PIO51");
+				beaconConnection.transmitData("AT+PIO21");
 				led3on = true;
 			} else {
-				beaconConnection.transmitData("AT+PIO50");
+				beaconConnection.transmitData("AT+PIO20");
 				led3on = false;
 			}
 		}
 	}
 
-	public void ledFour(View v) {
-		if (connected) {
-			if (!led4on) {
-				beaconConnection.transmitData("AT+PIO61");
-				led4on = true;
-			} else {
-				beaconConnection.transmitData("AT+PIO60");
-				led4on = false;
-			}
-		}
-	}
-
-	public void ledFive(View v) {
-		if (connected) {
-			if (!led5on) {
-				beaconConnection.transmitData("AT+PIO71");
-				led5on = true;
-			} else {
-				beaconConnection.transmitData("AT+PIO70");
-				led5on = false;
-			}
-		}
-	}
-
-	public void ledSix(View v) {
-		if (connected) {
-			if (!led6on) {
-				beaconConnection.transmitData("AT+PIO81");
-				led6on = true;
-			} else {
-				beaconConnection.transmitData("AT+PIO80");
-				led6on = false;
-			}
-		}
-	}
-
-	public void ledSeven(View v) {
-		if (connected) {
-			if (!led7on) {
-				beaconConnection.transmitData("AT+PIO91");
-				led7on = true;
-			} else {
-				beaconConnection.transmitData("AT+PIO90");
-				led7on = false;
-			}
-		}
-	}
-
-	public void ledEight(View v) {
-		if (connected) {
-			if (!led8on) {
-				beaconConnection.transmitData("AT+PIOA1");
-				led8on = true;
-			} else {
-				beaconConnection.transmitData("AT+PIOA0");
-				led8on = false;
-			}
-		}
-	}
 
 }

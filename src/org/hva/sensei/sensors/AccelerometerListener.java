@@ -85,17 +85,17 @@ public class AccelerometerListener implements SensorEventListener {
                 final ArrayList<AccelData> upload = (ArrayList<AccelData>) samples.clone();
                 //waarschijnlijk moet dit in een aparte thread omdat het teveel invloed heeft op de sampling rate
                 
-                new Runnable() {
-					
-					@Override
-					public void run() {
-						//add samples to database
-		                ads.open();
-		               // ads.addAccelDataList(samples, 0, run_id);
-		                ads.addAccelDataListFast(upload, 0, run_id);
-		    			ads.close();
-					}
-				}.run();
+//                new Runnable() {
+//					
+//					@Override
+//					public void run() {
+//						//add samples to database
+//		                ads.open();
+//		               // ads.addAccelDataList(samples, 0, run_id);
+//		                ads.addAccelDataListFast(upload, 0, run_id);
+//		    			ads.close();
+//					}
+//				}.run();
                 
                 samples = new ArrayList<AccelData>();
                 Log.d("AcceleromterTest", "Uploading to database");
@@ -120,10 +120,10 @@ public class AccelerometerListener implements SensorEventListener {
     
     public void submitLastSensorData(){
     	if(ads != null){
-    		ads.open();
-	    		// ads.addAccelDataList(samples, 0, run_id);
-    		ads.addAccelDataListFast(samples, 0, run_id);
-			ads.close();
+//    		ads.open();
+//	    		// ads.addAccelDataList(samples, 0, run_id);
+//    		ads.addAccelDataListFast(samples, 0, run_id);
+//			ads.close();
 			samples = new ArrayList<AccelData>();
     	}
     }

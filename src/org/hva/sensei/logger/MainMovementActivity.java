@@ -26,14 +26,11 @@ import org.hva.sensei.db.AccelDataSource;
 import org.hva.sensei.db.DatabaseHelper;
 import org.hva.sensei.db.HeartRateDataSource;
 import org.hva.sensei.sensors.AccelerometerListener;
-import org.hva.sensei.sensors.UDPThread;
 import org.hva.sensei.sensors.bluetooth.BluetoothHeartRateActivity;
 
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
@@ -173,18 +170,18 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 //				}
 				recording = false;
 
-				String backupLocation = Environment
-						.getExternalStorageDirectory().getAbsolutePath()
-						+ "/Sensei/backup"
-						+ System.currentTimeMillis()
-						+ ".zip";
-
-				ArrayList<String> uploadData = new ArrayList<String>();
-				uploadData.add(backupLocation);
-				makeZip mz = new makeZip(backupLocation);
-				mz.addZipFile(getDatabasePath(DatabaseHelper.DATABASE_NAME)
-						.getAbsolutePath());
-				mz.closeZip();
+//				String backupLocation = Environment
+//						.getExternalStorageDirectory().getAbsolutePath()
+//						+ "/Sensei/backup"
+//						+ System.currentTimeMillis()
+//						+ ".zip";
+//
+//				ArrayList<String> uploadData = new ArrayList<String>();
+//				uploadData.add(backupLocation);
+//				makeZip mz = new makeZip(backupLocation);
+//				mz.addZipFile(getDatabasePath(DatabaseHelper.DATABASE_NAME)
+//						.getAbsolutePath());
+//				mz.closeZip();
 			}
 		});
 
@@ -220,6 +217,20 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 //				scanLeDevice(true);
 //			}
 //		});
+		 
+		 Button clear_data = (Button) findViewById(R.id.clear_data);
+			clear_data.setOnClickListener(new View.OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+				
+					
+					// Remove the datapoints to save space
+					DatabaseHelper dbHelper = new DatabaseHelper(MainMovementActivity.this);
+					dbHelper.doSaveDelete(dbHelper.getWritableDatabase());
+
+				}
+			});
 	}
 
 	protected void onResume() {

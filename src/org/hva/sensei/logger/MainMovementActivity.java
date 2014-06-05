@@ -561,7 +561,6 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 			if(heart_rate != null){
 				heart_rate.setText(data);
 				
-				
 				if(recording){
 					hds.open();
 					hds.addHeartRateSilent(new HeartRateData(Long.parseLong(data), System.currentTimeMillis(), accelerometerListener.run_id));

@@ -9,5 +9,21 @@
     <string name="stimulus_blijft_gelijk">De volgende stimulus betekent ‘blijft gelijk’</string>
     <string name="stimulus_ga_zachter">De volgende stimulus betekent ‘ga zachter’</string>
     <string name="stimulus_generiek">Volgende stimulus....</string>
+    
+    
+    <string name="stimulus_query">Wat betekend deze stimulus?</string>
    
+    <string name="button_harder">Ga harder</string>
+    <string name="button_zachter">Ga zachter</string>
+    <string name="button_blijf_gelijk">Blijf gelijk</string>
+    
+    
+    <string name="start_fase_1">Start fase 1</string>
+    <string name="start_fase_2">Start fase 2</string>
+    <string name="start_fase_3">Start fase 3</string>
+    
+    <string name="backup_db_button">Backup db to SD</string>
+    
+    
+    
 </resources>

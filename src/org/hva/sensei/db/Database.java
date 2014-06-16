@@ -107,6 +107,20 @@ public final class Database {
 		
 	}
 	
+	/* Inner class that defines the table contents */
+	public static abstract class Coach implements BaseColumns {
+		public static final String TABLE_NAME = "coach";
+		public static final String COLUMN_NAME_RUN_ID = "runid";
+		public static final String COLUMN_NAME_DATETIME = "datetime";
+		public static final String COLUMN_NAME_STIMULUS = "stimulus";
+		public static final String COLUMN_NAME_STIMULUS_LENGTH = "stimulus_length";
+		public static final String COLUMN_NAME_ANSWER = "answer";
+		public static final String COLUMN_NAME_PLEASURE = "pleasure";
+		public static final String COLUMN_NAME_AROUSAL = "arousal";
+		public static final String COLUMN_NAME_INSTRUCTIONS = "instruction";
+	}
+	
+	
 	private static final String TEXT_TYPE = " TEXT";
 	private static final String INTEGER_TYPE = " INTEGER";
 	private static final String REAL_TYPE = " REAL";
@@ -215,5 +229,20 @@ public final class Database {
 	public static final String SQL_DELETE_QUEUE = "DROP TABLE IF EXISTS "
 			+ Queue.TABLE_NAME;
 
+	
+	public static final String SQL_CREATE_COACH = "CREATE TABLE "
+			+ Coach.TABLE_NAME + " (" + Coach._ID+ " INTEGER PRIMARY KEY," 
+			+ Coach.COLUMN_NAME_RUN_ID + TEXT_TYPE + COMMA_SEP 
+			+ Coach.COLUMN_NAME_DATETIME+ TEXT_TYPE+ COMMA_SEP 
+			+ Coach.COLUMN_NAME_STIMULUS+ TEXT_TYPE+ COMMA_SEP 
+			+ Coach.COLUMN_NAME_STIMULUS_LENGTH+ TEXT_TYPE+ COMMA_SEP 
+			+ Coach.COLUMN_NAME_PLEASURE+ TEXT_TYPE+ COMMA_SEP 
+			+ Coach.COLUMN_NAME_AROUSAL+ TEXT_TYPE+ COMMA_SEP 
+			+ Coach.COLUMN_NAME_INSTRUCTIONS+ TEXT_TYPE+ COMMA_SEP 
+			+ Coach.COLUMN_NAME_ANSWER+ TEXT_TYPE+  " )";
+	
+	public static final String SQL_DELETE_COACH = "DROP TABLE IF EXISTS "
+			+ Coach.TABLE_NAME;
+	
 	
 }

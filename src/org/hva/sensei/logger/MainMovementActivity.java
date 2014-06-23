@@ -37,7 +37,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.graphics.Interpolator;
 import android.graphics.Point;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -99,7 +98,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 	boolean recording = false;
 
 	AccelerometerListener accelerometerListener;
-	private int delayInMicroseconds = 50000; // for 20Hz sampling rate   SensorManager.SENSOR_DELAY_FASTEST;//
+	private int delayInMicroseconds =  SensorManager.SENSOR_DELAY_FASTEST;//50000; // for 20Hz sampling rate  
 	private boolean streamData = false;
 	Sensor mSensor;
 
@@ -211,18 +210,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 				
 				stopUpdates();
 
-				String backupLocation = Environment
-						.getExternalStorageDirectory().getAbsolutePath()
-						+ "/Sensei/backup"
-						+ System.currentTimeMillis()
-						+ ".zip";
-
-				ArrayList<String> uploadData = new ArrayList<String>();
-				uploadData.add(backupLocation);
-				makeZip mz = new makeZip(backupLocation);
-				mz.addZipFile(getDatabasePath(DatabaseHelper.DATABASE_NAME)
-						.getAbsolutePath());
-				mz.closeZip();
+				backupDB();
 			}
 		});
 
@@ -288,6 +276,35 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 	         * handle callbacks.
 	         */
 	        mLocationClient = new LocationClient(this, this, this);
+
+		 Button clear_data = (Button) findViewById(R.id.clear_data);
+			clear_data.setOnClickListener(new View.OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+				
+					
+					// Remove the datapoints to save space
+					DatabaseHelper dbHelper = new DatabaseHelper(MainMovementActivity.this);
+					dbHelper.doSaveDelete(dbHelper.getWritableDatabase());
+
+				}
+			});
+	}
+	
+	private void backupDB(){
+		String backupLocation = Environment
+				.getExternalStorageDirectory().getAbsolutePath()
+				+ "/Sensei/backup"
+				+ System.currentTimeMillis()
+				+ ".zip";
+
+		ArrayList<String> uploadData = new ArrayList<String>();
+		uploadData.add(backupLocation);
+		makeZip mz = new makeZip(backupLocation);
+		mz.addZipFile(getDatabasePath(DatabaseHelper.DATABASE_NAME)
+				.getAbsolutePath());
+		mz.closeZip();
 	}
 
 	protected void onResume() {
@@ -628,7 +645,6 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 			Log.d(TAG, "Hear rate data: "+data);
 			if(heart_rate != null){
 				heart_rate.setText(data);
-				
 				
 				if(recording){
 					hds.open();

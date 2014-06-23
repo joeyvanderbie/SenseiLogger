@@ -68,7 +68,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 	boolean recording = false;
 
 	AccelerometerListener accelerometerListener;
-	private int delayInMicroseconds = 50000; // for 20Hz sampling rate   SensorManager.SENSOR_DELAY_FASTEST;//
+	private int delayInMicroseconds =  SensorManager.SENSOR_DELAY_FASTEST;//50000; // for 20Hz sampling rate  
 	private boolean streamData = false;
 	Sensor mSensor;
 
@@ -170,18 +170,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 //				}
 				recording = false;
 
-//				String backupLocation = Environment
-//						.getExternalStorageDirectory().getAbsolutePath()
-//						+ "/Sensei/backup"
-//						+ System.currentTimeMillis()
-//						+ ".zip";
-//
-//				ArrayList<String> uploadData = new ArrayList<String>();
-//				uploadData.add(backupLocation);
-//				makeZip mz = new makeZip(backupLocation);
-//				mz.addZipFile(getDatabasePath(DatabaseHelper.DATABASE_NAME)
-//						.getAbsolutePath());
-//				mz.closeZip();
+				backupDB();
 			}
 		});
 
@@ -231,6 +220,21 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 
 				}
 			});
+	}
+	
+	private void backupDB(){
+		String backupLocation = Environment
+				.getExternalStorageDirectory().getAbsolutePath()
+				+ "/Sensei/backup"
+				+ System.currentTimeMillis()
+				+ ".zip";
+
+		ArrayList<String> uploadData = new ArrayList<String>();
+		uploadData.add(backupLocation);
+		makeZip mz = new makeZip(backupLocation);
+		mz.addZipFile(getDatabasePath(DatabaseHelper.DATABASE_NAME)
+				.getAbsolutePath());
+		mz.closeZip();
 	}
 
 	protected void onResume() {

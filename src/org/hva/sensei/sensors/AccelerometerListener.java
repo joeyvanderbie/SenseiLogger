@@ -85,17 +85,17 @@ public class AccelerometerListener implements SensorEventListener {
                 final ArrayList<AccelData> upload = (ArrayList<AccelData>) samples.clone();
                 //waarschijnlijk moet dit in een aparte thread omdat het teveel invloed heeft op de sampling rate
                 
-//                new Runnable() {
-//					
-//					@Override
-//					public void run() {
-//						//add samples to database
-//		                ads.open();
-//		               // ads.addAccelDataList(samples, 0, run_id);
-//		                ads.addAccelDataListFast(upload, 0, run_id);
-//		    			ads.close();
-//					}
-//				}.run();
+                new Runnable() {
+					
+					@Override
+					public void run() {
+						//add samples to database
+		                ads.open();
+		               // ads.addAccelDataList(samples, 0, run_id);
+		                ads.addAccelDataListFast(upload, 0, run_id);
+		    			ads.close();
+					}
+				}.run();
                 
                 samples = new ArrayList<AccelData>();
                 Log.d("AcceleromterTest", "Uploading to database");
@@ -110,11 +110,11 @@ public class AccelerometerListener implements SensorEventListener {
                 Math.round((event.timestamp - sensorTimeReference) / 1000000.0);
             samples.add(new AccelData(now, event.values[0], event.values[1], event.values[2], run_id));
 
-            hds.open();
-            int heartrate = hds.getLastHeartRate(run_id);
-            hds.close();
-            Log.d("AcceleromterTest", event.values[0] + " " + event.values[1] + " " + event.values[2] + " " + event.timestamp + ", "+ heartrate);
-        	new UDPThread().execute(event.values[0] + ", " + event.values[1] + ", " + event.values[2] + ", " + event.timestamp + ", "+ heartrate);
+//            hds.open();
+//            int heartrate = hds.getLastHeartRate(run_id);
+//            hds.close();
+//            Log.d("AcceleromterTest", event.values[0] + " " + event.values[1] + " " + event.values[2] + " " + event.timestamp + ", "+ heartrate);
+//        	new UDPThread().execute(event.values[0] + ", " + event.values[1] + ", " + event.values[2] + ", " + event.timestamp + ", "+ heartrate);
         }
     }
     

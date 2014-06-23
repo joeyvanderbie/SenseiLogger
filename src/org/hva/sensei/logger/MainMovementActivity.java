@@ -308,6 +308,14 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 		//unregisterReceiver(mReceiver);
 		
 		stopUpdates();
+		
+		 // If the client is connected
+        if (mLocationClient.isConnected()) {
+            stopPeriodicUpdates();
+        }
+
+        // After disconnect() is called, the client is considered "dead".
+        mLocationClient.disconnect();
 
 		// Unregister from SensorManager.
 		sensorManager.unregisterListener(accelerometerListener);
@@ -959,12 +967,15 @@ GooglePlayServicesClient.OnConnectionFailedListener {
     public void onStart() {
 
         super.onStart();
+		/*
+		 * Connect the client. Don't re-start any requests here;
+		 * instead, wait for onResume()
+		 */
+        if(!mLocationClient.isConnected()){
+        	mLocationClient.connect();
+        }
 
-        /*
-         * Connect the client. Don't re-start any requests here;
-         * instead, wait for onResume()
-         */
-        mLocationClient.connect();
+
 
     }
     
@@ -975,13 +986,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
     @Override
     public void onStop() {
 
-        // If the client is connected
-        if (mLocationClient.isConnected()) {
-            stopPeriodicUpdates();
-        }
-
-        // After disconnect() is called, the client is considered "dead".
-        mLocationClient.disconnect();
+       
 
         super.onStop();
     }

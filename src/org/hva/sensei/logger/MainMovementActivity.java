@@ -28,8 +28,10 @@ import org.hva.sensei.db.HeartRateDataSource;
 import org.hva.sensei.sensors.AccelerometerListener;
 import org.hva.sensei.sensors.bluetooth.BluetoothHeartRateActivity;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -212,11 +214,25 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 
 				@Override
 				public void onClick(View v) {
-				
-					
-					// Remove the datapoints to save space
-					DatabaseHelper dbHelper = new DatabaseHelper(MainMovementActivity.this);
-					dbHelper.doSaveDelete(dbHelper.getWritableDatabase());
+					 new AlertDialog.Builder(MainMovementActivity.this)
+				        .setIcon(android.R.drawable.ic_dialog_alert)
+				        .setTitle(R.string.button_clear_data)
+				        .setMessage(R.string.confirm_clear_data)
+				        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+
+				            @Override
+				            public void onClick(DialogInterface dialog, int which) {
+				            	backupDB();
+
+								// Remove the datapoints to save space
+								DatabaseHelper dbHelper = new DatabaseHelper(MainMovementActivity.this);
+								dbHelper.doSaveDelete(dbHelper.getWritableDatabase());  
+				            }
+
+				        })
+				        .setNegativeButton(R.string.no, null)
+				        .show();
+
 
 				}
 			});

@@ -1,5 +1,7 @@
 package org.hva.sensei.logger;
 
+
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -31,12 +33,9 @@ import org.hva.sensei.sensors.AccelerometerListener;
 import org.hva.sensei.sensors.LocationUtils;
 import org.hva.sensei.sensors.bluetooth.BluetoothHeartRateActivity;
 
-<<<<<<< HEAD
 import android.app.Activity;
-import android.app.Dialog;
-=======
 import android.app.AlertDialog;
->>>>>>> master
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -1010,20 +1009,6 @@ GooglePlayServicesClient.OnConnectionFailedListener {
         	mLocationClient.connect();
         }
 
-
-
-    }
-    
-    /*
-     * Called when the Activity is no longer visible at all.
-     * Stop updates and disconnect.
-     */
-    @Override
-    public void onStop() {
-
-       
-
-        super.onStop();
     }
     
     // A request to connect to Location Services

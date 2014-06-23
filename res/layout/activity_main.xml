@@ -193,14 +193,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/hint_target_ip"
-                android:inputType="textUri" />
+                android:inputType="textUri|textNoSuggestions" />
 
             <EditText
                 android:id="@+id/target_port"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/hint_target_port"
-                android:inputType="number" />
+                android:inputType="number|textNoSuggestions" />
         </LinearLayout>
 
         <LinearLayout

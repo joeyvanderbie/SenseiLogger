@@ -21,15 +21,17 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.hva.sensei.data.AccelData;
-import org.hva.sensei.data.HeartRateData;
+import org.hva.sensei.data.UserData;
 import org.hva.sensei.db.AccelDataSource;
 import org.hva.sensei.db.DatabaseHelper;
-import org.hva.sensei.db.HeartRateDataSource;
+import org.hva.sensei.db.UserDataSource;
 import org.hva.sensei.sensors.AccelerometerListener;
-import org.hva.sensei.sensors.bluetooth.BluetoothHeartRateActivity;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -50,12 +52,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-public class MainMovementActivity extends BluetoothHeartRateActivity {
+public class MainMovementActivity extends Activity {
 	public static DatagramSocket mSocket = null;
 	public static DatagramPacket mPacket = null;
 	TextView mIP_Adress;
 	TextView mPort;
 	TextView sampling_rate_textview;
+	TextView user_nr;
+	TextView run_nr_textview;
 	Button button1;
 	Button button2;
 	Button button3;
@@ -93,11 +97,6 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 //		}
 //	};
 
-	private TextView heart_rate;
-//	private Button connect;
-	
-	private HeartRateDataSource hds;
-	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -111,7 +110,6 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 		sensorManager.registerListener(accelerometerListener, accelerometer,
 				delayInMicroseconds);
 		
-		   hds = new HeartRateDataSource(this);
 	
 
 		// Register our receiver for the ACTION_SCREEN_OFF action. This will
@@ -124,7 +122,8 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 				.getSystemService(Context.POWER_SERVICE);
 		wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
 				"SenseiWakeLock");
-
+		run_nr_textview = (TextView) findViewById(R.id.run_id);
+		user_nr = (TextView) findViewById(R.id.user_nr);
 		sampling_rate_textview = (TextView) findViewById(R.id.sampling_rate_info);
 		button1 = (Button) findViewById(R.id.button1);
 		button1.setOnClickListener(new View.OnClickListener() {
@@ -140,6 +139,16 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 
 				// start_UDP_Stream();
 				accelerometerListener.startRecording();
+				
+				UserDataSource uds = new UserDataSource(MainMovementActivity.this);
+				UserData ud = new UserData();
+				ud.setName(user_nr.getText().toString());
+				ud.setTeamid(accelerometerListener.run_id);
+				uds.open();
+				uds.add(ud);
+				uds.close();
+				
+				run_nr_textview.setText(""+accelerometerListener.run_id);
 
 				wakeLock.acquire();
 				recording = true;
@@ -194,35 +203,37 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 					}
 				});
 
-		updateFileList();
-
-		//bluetooth hr
-		 heart_rate = (TextView) findViewById(R.id.heart_rate_info);
-//		 connect = (Button) findViewById(R.id.connect_device);
-//		 connect.setOnClickListener(new View.OnClickListener() {
-//			
-//			@Override
-//			public void onClick(View arg0) {
-//				scanLeDevice(true);
-//			}
-//		});
+		//updateFileList();
 		 
 		 Button clear_data = (Button) findViewById(R.id.clear_data);
 			clear_data.setOnClickListener(new View.OnClickListener() {
 
 				@Override
 				public void onClick(View v) {
-				
-					
-					// Remove the datapoints to save space
-					DatabaseHelper dbHelper = new DatabaseHelper(MainMovementActivity.this);
-					dbHelper.doSaveDelete(dbHelper.getWritableDatabase());
+					 new AlertDialog.Builder(MainMovementActivity.this)
+				        .setIcon(android.R.drawable.ic_dialog_alert)
+				        .setTitle(R.string.button_clear_data)
+				        .setMessage(R.string.confirm_clear_data)
+				        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+
+				            @Override
+				            public void onClick(DialogInterface dialog, int which) {
+				            	backupDB();
+								
+								// Remove the datapoints to save space
+								DatabaseHelper dbHelper = new DatabaseHelper(MainMovementActivity.this);
+								dbHelper.doSaveDelete(dbHelper.getWritableDatabase());  
+				            }
+
+				        })
+				        .setNegativeButton(R.string.no, null)
+				        .show();
 
 				}
 			});
 	}
 	
-	private void backupDB(){
+	private boolean backupDB(){
 		String backupLocation = Environment
 				.getExternalStorageDirectory().getAbsolutePath()
 				+ "/Sensei/backup"
@@ -235,6 +246,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 		mz.addZipFile(getDatabasePath(DatabaseHelper.DATABASE_NAME)
 				.getAbsolutePath());
 		mz.closeZip();
+		return true;
 	}
 
 	protected void onResume() {
@@ -556,41 +568,5 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 		ConnectivityManager conman = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 		return conman.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
 				.isConnectedOrConnecting();
-	}
-	
-	@Override
-	protected void processData(String data){
-		if(mConnected){
-			Log.d(TAG, "Hear rate data: "+data);
-			if(heart_rate != null){
-				heart_rate.setText(data);
-				
-				if(recording){
-					hds.open();
-					hds.addHeartRateSilent(new HeartRateData(Long.parseLong(data), System.currentTimeMillis(), accelerometerListener.run_id));
-					hds.close();
-					//new UDPThread().execute(data + ", " + System.currentTimeMillis());
-				}
-			}
-		}
-	}
-	
-	@Override
-	protected void onBluetoothDisconnected(){
-		Log.d(TAG, "Hear rate sensor disconnected");
-		if(heart_rate != null){
-			heart_rate.setText("-");
-		}
-		
-		//connect.setVisibility(View.VISIBLE);
-	}
-	
-	@Override
-	protected void onBluetoothConnected(){
-		Log.d(TAG, "Hear rate sensor connected");
-		if(heart_rate != null){
-			heart_rate.setText("...");
-//			connect.setVisibility(View.GONE);
-		}
 	}
 }

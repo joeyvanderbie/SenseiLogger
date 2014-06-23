@@ -16,6 +16,12 @@
     <string name="start">Start</string>
     <string name="stop">Stop</string>
     <string name="button_clear_data">Clear data</string>
+    <string name="confirm_clear_data">Delete all data from database?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="hint_user_nr">User id</string>
+    <string name="label_nr_tag">#</string>
+    <string name="label_run_id">Run nr</string>
     
     <!-- Bluetooth -->
      <string name="connect">Connect</string>

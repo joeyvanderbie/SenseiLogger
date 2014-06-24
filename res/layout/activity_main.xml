@@ -149,6 +149,99 @@
                 </LinearLayout>
             </RelativeLayout>
         </LinearLayout>
+                    <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="70dip"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:orientation="horizontal"
+                android:weightSum="2" >
+
+                <RelativeLayout
+                    style="@style/unit.style"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" >
+
+                    <TextView
+                        android:id="@+id/frequency_timer_header"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:text="@string/next_recording"
+                        android:textAppearance="@style/unit.header" />
+
+                    <LinearLayout
+                        style="@style/unit.info"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/frequency_timer_header"
+                        android:orientation="horizontal" >
+
+                        <TextView
+                            android:id="@+id/time_info"
+                            style="@style/unit.info"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="-" />
+
+                        <TextView
+                            style="@style/unit.unit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:text="@string/time_unit_seconds" />
+                    </LinearLayout>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    style="@style/unit.style"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1" >
+
+                    <TextView
+                        android:id="@+id/recording_timer_header"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:text="@string/recording_duration"
+                        android:textAppearance="@style/unit.header" />
+
+                    <LinearLayout
+                        style="@style/unit.info"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/recording_timer_header"
+                        android:orientation="horizontal" >
+
+                        <TextView
+                            android:id="@+id/recording_timer_info_icon"
+                            style="@color/disruptive"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="o"
+                            android:visibility="gone" />
+
+                        <TextView
+                            android:id="@+id/recording_timer_info"
+                            style="@style/unit.info"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="-" />
+
+                        <TextView
+                            style="@style/unit.unit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:text="@string/time_unit_seconds" />
+                    </LinearLayout>
+                </RelativeLayout>
+            </LinearLayout>
+
+            <org.hva.sensei.sensors.record.VuMeterView
+                android:id="@+id/vuMeterView"
+                android:layout_width="match_parent"
+                android:layout_height="30dip"
+                android:layout_marginTop="@dimen/activity_vertical_margin" />
 
         <Button
             android:id="@+id/button1"

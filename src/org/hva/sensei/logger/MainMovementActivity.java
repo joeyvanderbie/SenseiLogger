@@ -37,12 +37,14 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -82,6 +84,8 @@ public class MainMovementActivity extends Activity {
 	private static final int REQUEST_ENABLE_BT = 1;
 	// Stops scanning after 10 seconds.
 	private static final long SCAN_PERIOD = 10000;
+	
+	private ProgressDialog mProgressDialog;
 
 	// BroadcastReceiver for handling ACTION_SCREEN_OFF.
 //	private BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -179,7 +183,7 @@ public class MainMovementActivity extends Activity {
 //				}
 				recording = false;
 
-				backupDB();
+				new ProgressTask().execute(new String[0]);
 			}
 		});
 
@@ -218,11 +222,7 @@ public class MainMovementActivity extends Activity {
 
 				            @Override
 				            public void onClick(DialogInterface dialog, int which) {
-				            	backupDB();
-								
-								// Remove the datapoints to save space
-								DatabaseHelper dbHelper = new DatabaseHelper(MainMovementActivity.this);
-								dbHelper.doSaveDelete(dbHelper.getWritableDatabase());  
+				            	new ProgressTaskBackupAndDelete().execute(new String[0]); 
 				            }
 
 				        })
@@ -231,6 +231,10 @@ public class MainMovementActivity extends Activity {
 
 				}
 			});
+			
+			   mProgressDialog = new ProgressDialog(this);
+			   mProgressDialog.setIndeterminate(false);
+			    mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 	}
 	
 	private boolean backupDB(){
@@ -569,4 +573,53 @@ public class MainMovementActivity extends Activity {
 		return conman.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
 				.isConnectedOrConnecting();
 	}
+	
+	  public class ProgressTask extends AsyncTask <String, Void, String>{
+          @Override
+          protected void onPreExecute(){
+              mProgressDialog.show();
+          }
+
+          @Override
+          protected String doInBackground(String... arg0) {
+			
+                  //my stuff is here
+        	  		backupDB(); 
+        	  		
+        	  		return null;
+          }
+
+          @Override
+          protected void onPostExecute(String result) {
+                 mProgressDialog.dismiss();
+          }
+      }
+	  
+	  public class ProgressTaskBackupAndDelete extends AsyncTask <String, Void, String>{
+          @Override
+          protected void onPreExecute(){
+              mProgressDialog.show();
+          }
+
+          @Override
+          protected String doInBackground(String... arg0) {
+			
+                  //my stuff is here
+        	  		backupDB();
+        	  		
+					// Remove the datapoints to save space
+					DatabaseHelper dbHelper = new DatabaseHelper(
+							MainMovementActivity.this);
+					dbHelper.doSaveDelete(dbHelper
+							.getWritableDatabase());
+        	  		
+        	  
+        	  return null;   
+          }
+
+          @Override
+          protected void onPostExecute(String result) {
+                 mProgressDialog.dismiss();
+          }
+      }
 }

@@ -69,12 +69,17 @@ public class MainMovementActivity extends Activity {
 	Sensor accelerometer;
 	Sensor uiAccelerometer;
 	String accelPath = Environment.getExternalStorageDirectory()
-			+ "/Sensei/Accelerometer";
+			+ "/Sensei/Backup";
 	WakeLock wakeLock;
 	boolean recording = false;
 
 	AccelerometerListener accelerometerListener;
-	private int delayInMicroseconds =  SensorManager.SENSOR_DELAY_FASTEST;//50000; // for 20Hz sampling rate  
+	private int delayInMicroseconds = SensorManager.SENSOR_DELAY_FASTEST;// 50000;
+																			// //
+																			// for
+																			// 20Hz
+																			// sampling
+																			// rate
 	private boolean streamData = false;
 	Sensor mSensor;
 
@@ -84,22 +89,25 @@ public class MainMovementActivity extends Activity {
 	private static final int REQUEST_ENABLE_BT = 1;
 	// Stops scanning after 10 seconds.
 	private static final long SCAN_PERIOD = 10000;
-	
+
 	private ProgressDialog mProgressDialog;
+	private LinearLayout files;
+
+	private String userId = "";
 
 	// BroadcastReceiver for handling ACTION_SCREEN_OFF.
-//	private BroadcastReceiver mReceiver = new BroadcastReceiver() {
-//		@Override
-//		public void onReceive(Context context, Intent intent) {
-//			// Check action just to be on the safe side.
-//			if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-//				// Unregisters the listener and registers it again.
-//				sensorManager.unregisterListener(accelerometerListener);
-//				sensorManager.registerListener(accelerometerListener,
-//						accelerometer, delayInMicroseconds);
-//			}
-//		}
-//	};
+	// private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+	// @Override
+	// public void onReceive(Context context, Intent intent) {
+	// // Check action just to be on the safe side.
+	// if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+	// // Unregisters the listener and registers it again.
+	// sensorManager.unregisterListener(accelerometerListener);
+	// sensorManager.registerListener(accelerometerListener,
+	// accelerometer, delayInMicroseconds);
+	// }
+	// }
+	// };
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -113,14 +121,14 @@ public class MainMovementActivity extends Activity {
 		accelerometerListener = new AccelerometerListener(this);
 		sensorManager.registerListener(accelerometerListener, accelerometer,
 				delayInMicroseconds);
-		
-	
+
+		files = (LinearLayout) findViewById(R.id.fileList);
 
 		// Register our receiver for the ACTION_SCREEN_OFF action. This will
 		// make our receiver
 		// code be called whenever the phone enters standby mode.
-//		IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
-//		registerReceiver(mReceiver, filter);
+		// IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+		// registerReceiver(mReceiver, filter);
 
 		PowerManager mgr = (PowerManager) MainMovementActivity.this
 				.getSystemService(Context.POWER_SERVICE);
@@ -143,16 +151,18 @@ public class MainMovementActivity extends Activity {
 
 				// start_UDP_Stream();
 				accelerometerListener.startRecording();
-				
-				UserDataSource uds = new UserDataSource(MainMovementActivity.this);
+
+				UserDataSource uds = new UserDataSource(
+						MainMovementActivity.this);
 				UserData ud = new UserData();
 				ud.setName(user_nr.getText().toString());
+				userId = user_nr.getText().toString();
 				ud.setTeamid(accelerometerListener.run_id);
 				uds.open();
 				uds.add(ud);
 				uds.close();
-				
-				run_nr_textview.setText(""+accelerometerListener.run_id);
+
+				run_nr_textview.setText("" + accelerometerListener.run_id);
 
 				wakeLock.acquire();
 				recording = true;
@@ -168,28 +178,31 @@ public class MainMovementActivity extends Activity {
 				button1.setVisibility(View.VISIBLE);
 				button2.setEnabled(false);
 				button2.setVisibility(View.GONE);
-				
+
 				sampling_rate_textview.setText("-");
-				
+
 				accelerometerListener.stopRecording();
 				wakeLock.release();
 				// stop_UDP_Stream();
-//				try {
-//					exportAcceltoCSV(accelerometerListener.run_id);
-//					updateFileList();
-//				} catch (IOException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
+
+				// try {
+				// //exportAcceltoCSV(accelerometerListener.run_id);
+				//
+				// } catch (IOException e) {
+				// // TODO Auto-generated catch block
+				// e.printStackTrace();
+				// }
 				recording = false;
 
 				new ProgressTask().execute(new String[0]);
+
+				updateFileList();
 			}
 		});
 
 		mIP_Adress = (TextView) findViewById(R.id.target_ip);
 		mPort = (TextView) findViewById(R.id.target_port);
-		
+
 		ToggleButton streamDataButton = (ToggleButton) findViewById(R.id.stream_data_toggle);
 		streamDataButton.setChecked(streamData);
 		streamDataButton
@@ -198,51 +211,90 @@ public class MainMovementActivity extends Activity {
 					public void onCheckedChanged(CompoundButton buttonView,
 							boolean isChecked) {
 						streamData = isChecked;
-						if(streamData){
+						if (streamData) {
 							start_UDP_Stream();
-							
-						}else{
+
+						} else {
 							stop_UDP_Stream();
 						}
 					}
 				});
 
-		//updateFileList();
-		 
-		 Button clear_data = (Button) findViewById(R.id.clear_data);
-			clear_data.setOnClickListener(new View.OnClickListener() {
+		updateFileList();
 
-				@Override
-				public void onClick(View v) {
-					 new AlertDialog.Builder(MainMovementActivity.this)
-				        .setIcon(android.R.drawable.ic_dialog_alert)
-				        .setTitle(R.string.button_clear_data)
-				        .setMessage(R.string.confirm_clear_data)
-				        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+		Button clear_data = (Button) findViewById(R.id.clear_data);
+		clear_data.setOnClickListener(new View.OnClickListener() {
 
-				            @Override
-				            public void onClick(DialogInterface dialog, int which) {
-				            	new ProgressTaskBackupAndDelete().execute(new String[0]); 
-				            }
+			@Override
+			public void onClick(View v) {
+				new AlertDialog.Builder(MainMovementActivity.this)
+						.setIcon(android.R.drawable.ic_dialog_alert)
+						.setTitle(R.string.button_clear_data)
+						.setMessage(R.string.confirm_clear_data)
+						.setPositiveButton(R.string.yes,
+								new DialogInterface.OnClickListener() {
 
-				        })
-				        .setNegativeButton(R.string.no, null)
-				        .show();
+									@Override
+									public void onClick(DialogInterface dialog,
+											int which) {
+										new ProgressTaskBackupAndDelete()
+												.execute(new String[0]);
+										run_nr_textview.setText("0");
+										updateFileList();
+									}
 
-				}
-			});
-			
-			   mProgressDialog = new ProgressDialog(this);
-			   mProgressDialog.setIndeterminate(false);
-			    mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+								}).setNegativeButton(R.string.no, null).show();
+
+			}
+		});
+
+		Button refresh = (Button) findViewById(R.id.refresh_list);
+		refresh.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				updateFileList();
+			}
+		});
+
+		mProgressDialog = new ProgressDialog(this);
+		mProgressDialog.setIndeterminate(false);
+		mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+
 	}
-	
-	private boolean backupDB(){
-		String backupLocation = Environment
-				.getExternalStorageDirectory().getAbsolutePath()
-				+ "/Sensei/backup"
-				+ System.currentTimeMillis()
-				+ ".zip";
+
+	private boolean backupDB() {
+		String backupLocation = Environment.getExternalStorageDirectory()
+				.getAbsolutePath()
+				+ "/Sensei/Backup"
+				+ "/"
+				// + "/Download"+"/backup_"
+				+ userId
+				+ "_"
+				+ accelerometerListener.run_id
+				+ "_"
+				+ +System.currentTimeMillis() + ".zip";
+
+		ArrayList<String> uploadData = new ArrayList<String>();
+		uploadData.add(backupLocation);
+		makeZip mz = new makeZip(backupLocation);
+		mz.addZipFile(getDatabasePath(DatabaseHelper.DATABASE_NAME)
+				.getAbsolutePath());
+		mz.closeZip();
+		return true;
+	}
+
+	private boolean backupDBClearDB() {
+		String backupLocation = Environment.getExternalStorageDirectory()
+				.getAbsolutePath()
+				+ "/Sensei/Backup"
+				+ "/clear_"
+				// + "/Download"+"/backup_"
+				+ userId
+				+ "_"
+				+ accelerometerListener.run_id
+				+ "_"
+				+ +System.currentTimeMillis() + ".zip";
 
 		ArrayList<String> uploadData = new ArrayList<String>();
 		uploadData.add(backupLocation);
@@ -267,12 +319,12 @@ public class MainMovementActivity extends Activity {
 	@Override
 	public void onDestroy() {
 		// Unregister our receiver.
-		//unregisterReceiver(mReceiver);
+		// unregisterReceiver(mReceiver);
 
 		// Unregister from SensorManager.
 		sensorManager.unregisterListener(accelerometerListener);
 		stop_UDP_Stream();
-		if (wakeLock.isHeld()){
+		if (wakeLock.isHeld()) {
 			wakeLock.release();
 		}
 		super.onDestroy();
@@ -282,18 +334,17 @@ public class MainMovementActivity extends Activity {
 	private void updateFileList() {
 		File dir = new File(accelPath);
 		List<String> list = getSortedFilenames(dir);
-		LinearLayout files = (LinearLayout) findViewById(R.id.fileList);
 		files.removeAllViews();
 		for (final String file : list) {
 			Button b = new Button(this);
-			b.setText(this.getString(R.string.share_prefix_button) + " "+file);
+			b.setText(this.getString(R.string.share_prefix_button) + " " + file);
 			b.setOnClickListener(new OnClickListener() {
 
 				@Override
 				public void onClick(View v) {
 					Intent sharingIntent = new Intent(
 							android.content.Intent.ACTION_SEND);
-					sharingIntent.setType("text/csv");
+					sharingIntent.setType("application/zip");
 					sharingIntent.putExtra(
 							android.content.Intent.EXTRA_SUBJECT,
 							getResources().getString(R.string.share_title));
@@ -314,7 +365,8 @@ public class MainMovementActivity extends Activity {
 	public void displayRates() {
 		// button1.setEnabled(true);
 
-		sampling_rate_textview.setText(""+Math.round(accelerometerListener.getSamplingRate()));
+		sampling_rate_textview.setText(""
+				+ Math.round(accelerometerListener.getSamplingRate()));
 	}
 
 	public void exportAcceltoCSV(final int runId) throws IOException {
@@ -330,7 +382,8 @@ public class MainMovementActivity extends Activity {
 			// show waiting screen
 			CharSequence contentTitle = getString(R.string.app_name);
 			final ProgressDialog progDailog = ProgressDialog.show(this,
-					contentTitle, getString(R.string.msg_please_wait), true);// please wait
+					contentTitle, getString(R.string.msg_please_wait), true);// please
+																				// wait
 			final Handler handler = new Handler() {
 				@Override
 				public void handleMessage(Message msg) {
@@ -416,7 +469,7 @@ public class MainMovementActivity extends Activity {
 
 	private List<String> getSortedFilenames(File dir, String sub) {
 		List<String> list = new ArrayList<String>();
-		readDirectory(dir, list, "", ".csv");
+		readDirectory(dir, list, "", ".zip");
 		Collections.sort(list, new Comparator<String>() {
 			@Override
 			public int compare(String object1, String object2) {
@@ -508,6 +561,7 @@ public class MainMovementActivity extends Activity {
 
 		public void closeZip() {
 			try {
+				out.flush();
 				out.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -526,7 +580,8 @@ public class MainMovementActivity extends Activity {
 
 			InetAddress client_adress = null;
 			try {
-				client_adress = InetAddress.getByName(mIP_Adress.getText().toString());
+				client_adress = InetAddress.getByName(mIP_Adress.getText()
+						.toString());
 			} catch (UnknownHostException e) {
 				showDialog(R.string.error_invalidaddr);
 				return false;
@@ -573,53 +628,51 @@ public class MainMovementActivity extends Activity {
 		return conman.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
 				.isConnectedOrConnecting();
 	}
-	
-	  public class ProgressTask extends AsyncTask <String, Void, String>{
-          @Override
-          protected void onPreExecute(){
-              mProgressDialog.show();
-          }
 
-          @Override
-          protected String doInBackground(String... arg0) {
-			
-                  //my stuff is here
-        	  		backupDB(); 
-        	  		
-        	  		return null;
-          }
+	public class ProgressTask extends AsyncTask<String, Void, String> {
+		@Override
+		protected void onPreExecute() {
+			mProgressDialog.show();
+		}
 
-          @Override
-          protected void onPostExecute(String result) {
-                 mProgressDialog.dismiss();
-          }
-      }
-	  
-	  public class ProgressTaskBackupAndDelete extends AsyncTask <String, Void, String>{
-          @Override
-          protected void onPreExecute(){
-              mProgressDialog.show();
-          }
+		@Override
+		protected String doInBackground(String... arg0) {
 
-          @Override
-          protected String doInBackground(String... arg0) {
-			
-                  //my stuff is here
-        	  		backupDB();
-        	  		
-					// Remove the datapoints to save space
-					DatabaseHelper dbHelper = new DatabaseHelper(
-							MainMovementActivity.this);
-					dbHelper.doSaveDelete(dbHelper
-							.getWritableDatabase());
-        	  		
-        	  
-        	  return null;   
-          }
+			// my stuff is here
+			backupDB();
+			return null;
+		}
 
-          @Override
-          protected void onPostExecute(String result) {
-                 mProgressDialog.dismiss();
-          }
-      }
+		@Override
+		protected void onPostExecute(String result) {
+			mProgressDialog.dismiss();
+		}
+	}
+
+	public class ProgressTaskBackupAndDelete extends
+			AsyncTask<String, Void, String> {
+		@Override
+		protected void onPreExecute() {
+			mProgressDialog.show();
+		}
+
+		@Override
+		protected String doInBackground(String... arg0) {
+
+			// my stuff is here
+			backupDBClearDB();
+
+			// Remove the datapoints to save space
+			DatabaseHelper dbHelper = new DatabaseHelper(
+					MainMovementActivity.this);
+			dbHelper.doSaveDelete(dbHelper.getWritableDatabase());
+
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+			mProgressDialog.dismiss();
+		}
+	}
 }

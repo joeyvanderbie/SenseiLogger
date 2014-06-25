@@ -15,7 +15,8 @@
     <!-- Buttons -->
     <string name="start">Start</string>
     <string name="stop">Stop</string>
-    <string name="button_clear_data">Clear data</string>
+    <string name="button_clear_data">Clear database</string>
+    <string name="button_refresh">Refresh</string>
     <string name="confirm_clear_data">Delete all data from database?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>

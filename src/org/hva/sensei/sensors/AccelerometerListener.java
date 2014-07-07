@@ -107,7 +107,14 @@ public class AccelerometerListener implements SensorEventListener {
 //
 //            }
             
-
+            if (numSamples >= 1000) {
+            	 startTime = now;
+            	new ProgressTaskAccelData().execute(samples);
+            	
+            	numSamples = 0;
+            	 samples = new ArrayList<AccelData>();
+               Log.d("AcceleromterTest", "Uploading to database");
+            }
             
             if(sensorTimeReference == 0l && myTimeReference == 0l) {
                 sensorTimeReference = event.timestamp;
@@ -116,18 +123,18 @@ public class AccelerometerListener implements SensorEventListener {
             // set event timestamp to current time in milliseconds
             event.timestamp = myTimeReference + 
                 Math.round((event.timestamp - sensorTimeReference) / 1000000.0);
-           // samples.add(new AccelData(now, event.values[0], event.values[1], event.values[2], run_id));
+            samples.add(new AccelData(event.timestamp, event.values[0], event.values[1], event.values[2], run_id));
 
            
 
-            values[0] =  String.valueOf(event.timestamp);
-            values[1] =  String.valueOf(event.values[0]);
-            values[2] =  String.valueOf(event.values[1]);
-            values[3] =  String.valueOf(event.values[2]);
-            values[4] =  String.valueOf(run_id);
-            
-            
-            new ProgressTask().execute(values);
+//            values[0] =  String.valueOf(event.timestamp);
+//            values[1] =  String.valueOf(event.values[0]);
+//            values[2] =  String.valueOf(event.values[1]);
+//            values[3] =  String.valueOf(event.values[2]);
+//            values[4] =  String.valueOf(run_id);
+//            
+//            
+//            new ProgressTask().execute(values);
             Log.d("AcceleromterTest", event.values[0] + " " + event.values[1] + " " + event.values[2] + " " + event.timestamp );
 //        	new UDPThread().execute(event.values[0] + ", " + event.values[1] + ", " + event.values[2] + ", " + event.timestamp + ", "+ heartrate);
         }
@@ -159,6 +166,26 @@ public class AccelerometerListener implements SensorEventListener {
 			ads.open();
 	        ads.add(new AccelData(Long.parseLong(params[0]), Double.parseDouble(params[1]), Double.parseDouble(params[2]), Double.parseDouble(params[3]), Long.parseLong(params[4])), 0, 0);
 			ads.close();
+			
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+		}
+	}
+	
+	public class ProgressTaskAccelData extends AsyncTask<ArrayList<AccelData>, Void, String> {
+		@Override
+		protected void onPreExecute() {
+			
+		}
+
+		@Override
+		protected String doInBackground(ArrayList<AccelData>... params) {
+			ads.open();
+	        ads.addAccelDataListFast(params[0], 0);
+	        ads.close();
 			
 			return null;
 		}

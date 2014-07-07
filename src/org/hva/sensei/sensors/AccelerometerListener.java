@@ -114,6 +114,8 @@ public class AccelerometerListener implements SensorEventListener {
             	numSamples = 0;
             	 samples = new ArrayList<AccelData>();
                Log.d("AcceleromterTest", "Uploading to database");
+               //Do Garbage Collection to make sure delay of GC is not longer than 50ms
+               System.gc();
             }
             
             if(sensorTimeReference == 0l && myTimeReference == 0l) {

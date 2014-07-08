@@ -74,7 +74,7 @@ public class MainMovementActivity extends Activity {
 	boolean recording = false;
 
 	AccelerometerListener accelerometerListener;
-	private int delayInMicroseconds = SensorManager.SENSOR_DELAY_FASTEST;// 50000;
+	private int delayInMicroseconds = 10000;//SensorManager.SENSOR_DELAY_FASTEST;// 50000;
 																			// //
 																			// for
 																			// 20Hz

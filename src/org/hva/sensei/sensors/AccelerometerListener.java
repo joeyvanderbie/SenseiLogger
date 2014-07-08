@@ -138,9 +138,9 @@ public class AccelerometerListener implements SensorEventListener {
 //            
 //            new ProgressTask().execute(values);
            // Log.d("AcceleromterTest", event.values[0] + " " + event.values[1] + " " + event.values[2] + " " + event.timestamp );
-            if(samples.size() > 2){
-            Log.d("Delta t", ""+(samples.get(samples.size()-2).getTimestamp()-event.timestamp) );
-            }
+//            if(samples.size() > 2){
+//            Log.d("Delta t", ""+(samples.get(samples.size()-2).getTimestamp()-event.timestamp) );
+//            }
 //        	new UDPThread().execute(event.values[0] + ", " + event.values[1] + ", " + event.values[2] + ", " + event.timestamp + ", "+ heartrate);
         }
     }

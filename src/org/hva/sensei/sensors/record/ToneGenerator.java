@@ -74,7 +74,7 @@ public class ToneGenerator {
 	    
 	    public void playSound(int sampleRate, byte[] generatedSnd){
 	        final AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-	        		sampleRate, AudioFormat.CHANNEL_CONFIGURATION_MONO,
+	        		sampleRate, AudioFormat.CHANNEL_OUT_DEFAULT,
 	                AudioFormat.ENCODING_PCM_16BIT, generatedSnd.length,
 	                AudioTrack.MODE_STATIC);
 	        audioTrack.write(generatedSnd, 0, generatedSnd.length);

@@ -113,8 +113,8 @@ public class AccelerometerListener implements SensorEventListener {
             hds.open();
             int heartrate = hds.getLastHeartRate(run_id);
             hds.close();
-            Log.d("AcceleromterTest", event.values[0] + " " + event.values[1] + " " + event.values[2] + " " + event.timestamp + ", "+ heartrate);
-        	new UDPThread().execute(event.values[0] + ", " + event.values[1] + ", " + event.values[2] + ", " + event.timestamp + ", "+ heartrate);
+           // Log.d("AcceleromterTest", event.values[0] + " " + event.values[1] + " " + event.values[2] + " " + event.timestamp + ", "+ heartrate);
+        	//new UDPThread().execute(event.values[0] + ", " + event.values[1] + ", " + event.values[2] + ", " + event.timestamp + ", "+ heartrate);
         }
     }
     

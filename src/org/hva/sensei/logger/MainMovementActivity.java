@@ -38,6 +38,7 @@ import org.hva.sensei.sensors.AccelerometerListener;
 import org.hva.sensei.sensors.LocationUtils;
 import org.hva.sensei.sensors.bluetooth.BluetoothHeartRateActivity;
 import org.hva.sensei.sensors.record.AudioRecorder;
+import org.hva.sensei.sensors.record.RecordService;
 import org.hva.sensei.sensors.record.ToneGenerator;
 import org.hva.sensei.sensors.record.VuMeterView;
 
@@ -57,6 +58,7 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.media.MediaPlayer;
+import android.media.SoundPool;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -70,7 +72,6 @@ import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -115,6 +116,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity implements
 	String accelPath = Environment.getExternalStorageDirectory()
 			+ "/Sensei/Accelerometer";
 	WakeLock wakeLock;
+	WakeLock voice;
 	boolean recording = false;
 
 	AccelerometerListener accelerometerListener;
@@ -156,7 +158,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity implements
 	String fileExt = ".wav";
 
 	private int recording_duration = 10;
-	private int recording_frequency = 180;
+	private int recording_frequency = 30; //180
 	private int recording_frequency_count = 10;
 	private int current_frequency_count = 0;
 
@@ -188,7 +190,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity implements
 			});
 
 			if (duration <= 0) {
-				runOnUiThread(new Runnable() {
+				audioHandler.post(new Runnable() {
 					public void run() {
 						onClickRecord(false);
 						startRecordingWithFrequency(true);
@@ -219,7 +221,9 @@ public class MainMovementActivity extends BluetoothHeartRateActivity implements
 			});
 
 			if (duration <= 0) {
-				runOnUiThread(new Runnable() {
+				//this shouldnt run on the ui thread
+				//make a service of the recorder part
+				audioHandler.post(new Runnable() {
 					public void run() {
 						// onClickRecord(true);
 						startRecordingWithQuestion();
@@ -281,6 +285,8 @@ public class MainMovementActivity extends BluetoothHeartRateActivity implements
 				.getSystemService(Context.POWER_SERVICE);
 		wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
 				"SenseiWakeLock");
+		voice = mgr.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "SenseiVoiceWakeLock");
+	      
 
 		sampling_rate_textview = (TextView) findViewById(R.id.sampling_rate_info);
 		button1 = (Button) findViewById(R.id.button1);
@@ -302,7 +308,8 @@ public class MainMovementActivity extends BluetoothHeartRateActivity implements
 				recording = true;
 
 				startUpdates();
-				startRecordingWithFrequency(true);
+				//startRecordingWithFrequency(true);
+				onStartClicked();
 
 			}
 		});
@@ -331,9 +338,11 @@ public class MainMovementActivity extends BluetoothHeartRateActivity implements
 				recording = false;
 
 				stopUpdates();
-				startRecordingWithFrequency(false);
+				
+				onStopClicked();
+				//startRecordingWithFrequency(false);
 
-				new ProgressTask().execute(new String[0]);
+				//new ProgressTask().execute(new String[0]);
 			}
 		});
 
@@ -444,6 +453,18 @@ public class MainMovementActivity extends BluetoothHeartRateActivity implements
    	   mProgressDialog.setIndeterminate(false);
    	   mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 	}
+	
+	 private void onStartClicked()
+	    {
+	        Intent intent = new Intent(this, RecordService.class);
+	        startService(intent);
+	    }
+	    
+	    private void onStopClicked()
+	    {
+	        Intent intent = new Intent(this, RecordService.class);
+	        stopService(intent);
+	    }
 
 	private void backupDB() {
 		String backupLocation = Environment.getExternalStorageDirectory()
@@ -1284,22 +1305,30 @@ public class MainMovementActivity extends BluetoothHeartRateActivity implements
 
 	private void startRecordingWithQuestion() {
 		frequencyTimer.cancel();
-
+		
 		// tts play
 		HashMap<String, String> map = new HashMap<String, String>();
 		map.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "UniqueID");
 
-		String toSpeak = "Geef aan hoe je je voelt op een schaal van 1 tot 11.";// recording_message.getText().toString();
+		String toSpeak = "How do you feel? How aroused are you? And how tired are you?";// recording_message.getText().toString();
 		ttobj.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, map);
 	}
 
 	protected void onClickRecord(boolean start) {
 		// record_button.setChecked(start);
 		// if (record_button.isChecked()) {
+		
 		if (start) {
 			// force disabled before recording
 			// record_button.setChecked(false);
 			// record_button.setEnabled(false);
+			
+			//if recorder allready running do nothing
+			if(mRecorder !=null){
+				if(mRecorder.isActive()){
+					return;
+				}
+			}
 
 			// prepare recording
 			SimpleDateFormat fileNameDate = new SimpleDateFormat();
@@ -1338,8 +1367,11 @@ public class MainMovementActivity extends BluetoothHeartRateActivity implements
 				if (mRecorder.isActive()) {
 					mRecorder.stop();
 
-					ToneGenerator tone = new ToneGenerator();
-					tone.playSound(8000, tone.genTone());
+//					ToneGenerator tone = new ToneGenerator();
+//					tone.playSound(8000, tone.genTone());
+					SoundPool sp = new SoundPool(5, AudioManager.STREAM_MUSIC, 0);
+					 int soundId = sp.load(this, R.raw.answering_machine, 1); 
+					 sp.play(soundId, 1, 1, 0, 0, 1);
 				}
 
 				// ToggleButton playBtn = (ToggleButton)
@@ -1359,23 +1391,28 @@ public class MainMovementActivity extends BluetoothHeartRateActivity implements
 				// recording_duration_icon.setVisibility(View.GONE);
 				updateFileList();
 			}
+			voice.release();
 		}
 	}
 
 	public void playBeepAndStartRecording(int sampleRate, byte[] generatedSnd) {
-		final AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-				sampleRate, AudioFormat.CHANNEL_CONFIGURATION_MONO,
-				AudioFormat.ENCODING_PCM_16BIT, generatedSnd.length,
-				AudioTrack.MODE_STATIC);
+//		final AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
+//				sampleRate, AudioFormat.CHANNEL_CONFIGURATION_MONO,
+//				AudioFormat.ENCODING_PCM_16BIT, generatedSnd.length,
+//				AudioTrack.MODE_STATIC);
+//
+//		audioTrack.write(generatedSnd, 0, generatedSnd.length);
+//		audioTrack.play();
 
-		audioTrack.write(generatedSnd, 0, generatedSnd.length);
-		audioTrack.play();
-
+		SoundPool sp = new SoundPool(5, AudioManager.STREAM_MUSIC, 0);
+		 int soundId = sp.load(this, R.raw.answering_machine, 1); 
+		 sp.play(soundId, 1, 1, 0, 0, 1);
+		
 		audioHandler.postDelayed(new Runnable() {
 			public void run() {
 				onClickRecord(true);
 			}
-		}, generatedSnd.length / sampleRate * 1000);
+		}, 2* 1000);//generatedSnd.length / sampleRate * 1000);
 
 	}
 	

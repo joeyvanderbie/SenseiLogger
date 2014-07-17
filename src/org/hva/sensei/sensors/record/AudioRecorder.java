@@ -18,7 +18,7 @@ import android.os.Environment;
  * @author XpLoDWilD, Ben McCann
  */
 public class AudioRecorder {
-    final MediaRecorder recorder = new MediaRecorder();
+    MediaRecorder recorder = new MediaRecorder();
     final String path;
     private boolean isActive = false;
 
@@ -62,6 +62,7 @@ public class AudioRecorder {
             throw new IOException("Path to file could not be created.");
         }
 
+        recorder = new MediaRecorder();
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
 //        recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
 //        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
@@ -81,6 +82,7 @@ public class AudioRecorder {
     public void stop() throws IOException {
         recorder.stop();
         recorder.release();
+        recorder = null;
         isActive = false;
     }
     

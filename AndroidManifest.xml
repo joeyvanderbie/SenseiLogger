@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.hva.sensei.logger"
-    android:versionCode="8"
+    android:versionCode="12"
     android:versionName="1.6" >
 
     <uses-sdk
@@ -45,6 +45,7 @@
             android:name="org.hva.sensei.logger.MainMovementActivity"
             android:icon="@drawable/ic_launcher_movement"
             android:label="@string/app_name_sim"
+            android:keepScreenOn="true"
             android:screenOrientation="portrait" >
               <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -64,6 +65,8 @@
         <service
             android:name="org.hva.sensei.sensors.bluetooth.BluetoothLeService"
             android:enabled="true" />
+           <service android:name="org.hva.sensei.sensors.record.RecordService"
+                         android:label="Record service" />
         <meta-data android:name="com.google.android.gms.version"
            android:value="@integer/google_play_services_version" />
     <!--      <meta-data

@@ -44,8 +44,7 @@ public class AccelDataSource {
 		}
 	}
 
-	public void addAccelDataListFast(ArrayList<AccelData> accel, int user_id,
-			int run_id) {
+	public void addAccelDataListFast(ArrayList<AccelData> accel, int user_id) {
 		try {
 			database.beginTransaction();
 			// insert huge data
@@ -59,12 +58,24 @@ public class AccelDataSource {
 							+ Database.MOVEMENT.COLUMN_NAME_ACCEL_Y + ","
 							+ Database.MOVEMENT.COLUMN_NAME_ACCEL_Z + ","
 							+ Database.MOVEMENT.COLUMN_NAME_DATETIME + ") "
-							+ "values ("+user_id+","+run_id+",?,?,?,?)");
-			for (AccelData acd : accel) {
-				statement.bindDouble(1, acd.getX());
-				statement.bindDouble(2, acd.getY());
-				statement.bindDouble(3, acd.getZ());
-				statement.bindString(4, acd.getTimestamp()+"");
+							+ "values ("+user_id+",?,?,?,?,?)");
+//			for (AccelData acd : accel) {
+//				statement.bindDouble(1, acd.getRun_id());
+//				statement.bindDouble(2, acd.getX());
+//				statement.bindDouble(3, acd.getY());
+//				statement.bindDouble(4, acd.getZ());
+//				statement.bindString(5, acd.getTimestamp()+"");
+//
+//				statement.execute();
+//			}
+			AccelData acd;
+			for (int i = 0; i< accel.size(); i++){
+				 acd = accel.get(i);
+				statement.bindDouble(1, acd.getRun_id());
+				statement.bindDouble(2, acd.getX());
+				statement.bindDouble(3, acd.getY());
+				statement.bindDouble(4, acd.getZ());
+				statement.bindString(5, acd.getTimestamp()+"");
 
 				statement.execute();
 			}

@@ -52,6 +52,7 @@ public class AccelerometerListener implements SensorEventListener {
         ads = new AccelDataSource(accelerometerTest);
         ads.open();
         run_id = ads.getLastAccelRunId()+1;
+        ads.close();
         handler = new Handler();
         
         
@@ -113,7 +114,6 @@ public class AccelerometerListener implements SensorEventListener {
             	
             	numSamples = 0;
             	 samples = new ArrayList<AccelData>();
-               Log.d("AcceleromterTest", "Uploading to database");
                //Do Garbage Collection to make sure delay of GC is not longer than 50ms
                System.gc();
             }
@@ -147,10 +147,9 @@ public class AccelerometerListener implements SensorEventListener {
     
     public void submitLastSensorData(){
     	if(ads != null){
-//    		ads.open();
-//	    		// ads.addAccelDataList(samples, 0, run_id);
-//    		ads.addAccelDataListFast(samples, 0, run_id);
-//			ads.close();
+        	new ProgressTaskAccelData().execute(samples);
+        	numSamples = 0;
+
 			samples = new ArrayList<AccelData>();
     	}
     }
@@ -189,6 +188,7 @@ public class AccelerometerListener implements SensorEventListener {
 		@Override
 		protected String doInBackground(ArrayList<AccelData>... params) {
 			ads.open();
+            Log.d("AcceleromterTest", "Uploading to database");
 	        ads.addAccelDataListFast(params[0], 0);
 	        ads.close();
 			

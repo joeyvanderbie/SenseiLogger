@@ -37,6 +37,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -70,7 +71,8 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 	boolean recording = false;
 
 	AccelerometerListener accelerometerListener;
-	private int delayInMicroseconds =  SensorManager.SENSOR_DELAY_FASTEST;//50000; // for 20Hz sampling rate  
+	private int delayInMicroseconds = 50000; // for 20Hz sampling rate
+												// SensorManager.SENSOR_DELAY_FASTEST;//
 	private boolean streamData = false;
 	Sensor mSensor;
 
@@ -81,29 +83,36 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 	// Stops scanning after 10 seconds.
 	private static final long SCAN_PERIOD = 10000;
 
+	private ProgressDialog mProgressDialog;
+	private LinearLayout files;
+	
 	// BroadcastReceiver for handling ACTION_SCREEN_OFF.
-//	private BroadcastReceiver mReceiver = new BroadcastReceiver() {
-//		@Override
-//		public void onReceive(Context context, Intent intent) {
-//			// Check action just to be on the safe side.
-//			if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
-//				// Unregisters the listener and registers it again.
-//				sensorManager.unregisterListener(accelerometerListener);
-//				sensorManager.registerListener(accelerometerListener,
-//						accelerometer, delayInMicroseconds);
-//			}
-//		}
-//	};
+	// private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+	// @Override
+	// public void onReceive(Context context, Intent intent) {
+	// // Check action just to be on the safe side.
+	// if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+	// // Unregisters the listener and registers it again.
+	// sensorManager.unregisterListener(accelerometerListener);
+	// sensorManager.registerListener(accelerometerListener,
+	// accelerometer, delayInMicroseconds);
+	// }
+	// }
+	// };
 
 	private TextView heart_rate;
-//	private Button connect;
-	
+	// private Button connect;
+
 	private HeartRateDataSource hds;
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		mProgressDialog = new ProgressDialog(this);
+		mProgressDialog.setIndeterminate(false);
+		mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 
 		sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 		accelerometer = sensorManager
@@ -112,15 +121,14 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 		accelerometerListener = new AccelerometerListener(this);
 		sensorManager.registerListener(accelerometerListener, accelerometer,
 				delayInMicroseconds);
-		
-		   hds = new HeartRateDataSource(this);
-	
+
+		hds = new HeartRateDataSource(this);
 
 		// Register our receiver for the ACTION_SCREEN_OFF action. This will
 		// make our receiver
 		// code be called whenever the phone enters standby mode.
-//		IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
-//		registerReceiver(mReceiver, filter);
+		// IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+		// registerReceiver(mReceiver, filter);
 
 		PowerManager mgr = (PowerManager) MainMovementActivity.this
 				.getSystemService(Context.POWER_SERVICE);
@@ -157,28 +165,28 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 				button1.setVisibility(View.VISIBLE);
 				button2.setEnabled(false);
 				button2.setVisibility(View.GONE);
-				
+
 				sampling_rate_textview.setText("-");
-				
+
 				accelerometerListener.stopRecording();
 				wakeLock.release();
 				// stop_UDP_Stream();
-//				try {
-//					exportAcceltoCSV(accelerometerListener.run_id);
-//					updateFileList();
-//				} catch (IOException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
+				try {
+					exportAcceltoCSV(accelerometerListener.run_id);
+					updateFileList();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				recording = false;
 
-				backupDB();
+				 backupDB();
 			}
 		});
 
 		mIP_Adress = (TextView) findViewById(R.id.target_ip);
 		mPort = (TextView) findViewById(R.id.target_port);
-		
+
 		ToggleButton streamDataButton = (ToggleButton) findViewById(R.id.stream_data_toggle);
 		streamDataButton.setChecked(streamData);
 		streamDataButton
@@ -187,10 +195,10 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 					public void onCheckedChanged(CompoundButton buttonView,
 							boolean isChecked) {
 						streamData = isChecked;
-						if(streamData){
+						if (streamData) {
 							start_UDP_Stream();
-							
-						}else{
+
+						} else {
 							stop_UDP_Stream();
 						}
 					}
@@ -198,52 +206,57 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 
 		updateFileList();
 
-		//bluetooth hr
-		 heart_rate = (TextView) findViewById(R.id.heart_rate_info);
-//		 connect = (Button) findViewById(R.id.connect_device);
-//		 connect.setOnClickListener(new View.OnClickListener() {
-//			
-//			@Override
-//			public void onClick(View arg0) {
-//				scanLeDevice(true);
-//			}
-//		});
-		 
-		 Button clear_data = (Button) findViewById(R.id.clear_data);
-			clear_data.setOnClickListener(new View.OnClickListener() {
+		// bluetooth hr
+		heart_rate = (TextView) findViewById(R.id.heart_rate_info);
+		// connect = (Button) findViewById(R.id.connect_device);
+		// connect.setOnClickListener(new View.OnClickListener() {
+		//
+		// @Override
+		// public void onClick(View arg0) {
+		// scanLeDevice(true);
+		// }
+		// });
 
-				@Override
-				public void onClick(View v) {
-					 new AlertDialog.Builder(MainMovementActivity.this)
-				        .setIcon(android.R.drawable.ic_dialog_alert)
-				        .setTitle(R.string.button_clear_data)
-				        .setMessage(R.string.confirm_clear_data)
-				        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+		Button clear_data = (Button) findViewById(R.id.clear_data);
+		clear_data.setOnClickListener(new View.OnClickListener() {
 
-				            @Override
-				            public void onClick(DialogInterface dialog, int which) {
-				            	backupDB();
+			@Override
+			public void onClick(View v) {
+				new AlertDialog.Builder(MainMovementActivity.this)
+						.setIcon(android.R.drawable.ic_dialog_alert)
+						.setTitle(R.string.button_clear_data)
+						.setMessage(R.string.confirm_clear_data)
+						.setPositiveButton(R.string.yes,
+								new DialogInterface.OnClickListener() {
 
-								// Remove the datapoints to save space
-								DatabaseHelper dbHelper = new DatabaseHelper(MainMovementActivity.this);
-								dbHelper.doSaveDelete(dbHelper.getWritableDatabase());  
-				            }
+									@Override
+									public void onClick(DialogInterface dialog,
+											int which) {
+										new ProgressTaskBackupAndDelete()
+												.execute(new String[0]);
+										updateFileList();
+									}
 
-				        })
-				        .setNegativeButton(R.string.no, null)
-				        .show();
+								}).setNegativeButton(R.string.no, null).show();
 
+			}
+		});
+		Button refresh = (Button) findViewById(R.id.refresh_list);
+		refresh.setOnClickListener(new View.OnClickListener() {
 
-				}
-			});
+			@Override
+			public void onClick(View v) {
+				updateFileList();
+			}
+		});
+
 	}
-	
-	private void backupDB(){
-		String backupLocation = Environment
-				.getExternalStorageDirectory().getAbsolutePath()
+
+	private void backupDB() {
+		String backupLocation = Environment.getExternalStorageDirectory()
+				.getAbsolutePath()
 				+ "/Sensei/backup"
-				+ System.currentTimeMillis()
-				+ ".zip";
+				+ System.currentTimeMillis() + ".zip";
 
 		ArrayList<String> uploadData = new ArrayList<String>();
 		uploadData.add(backupLocation);
@@ -252,6 +265,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 				.getAbsolutePath());
 		mz.closeZip();
 	}
+	
 
 	protected void onResume() {
 		super.onResume();
@@ -267,12 +281,12 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 	@Override
 	public void onDestroy() {
 		// Unregister our receiver.
-		//unregisterReceiver(mReceiver);
+		// unregisterReceiver(mReceiver);
 
 		// Unregister from SensorManager.
 		sensorManager.unregisterListener(accelerometerListener);
 		stop_UDP_Stream();
-		if (wakeLock.isHeld()){
+		if (wakeLock.isHeld()) {
 			wakeLock.release();
 		}
 		super.onDestroy();
@@ -280,13 +294,14 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 	}
 
 	private void updateFileList() {
+		mProgressDialog.show();
 		File dir = new File(accelPath);
 		List<String> list = getSortedFilenames(dir);
 		LinearLayout files = (LinearLayout) findViewById(R.id.fileList);
 		files.removeAllViews();
 		for (final String file : list) {
 			Button b = new Button(this);
-			b.setText(this.getString(R.string.share_prefix_button) + " "+file);
+			b.setText(this.getString(R.string.share_prefix_button) + " " + file);
 			b.setOnClickListener(new OnClickListener() {
 
 				@Override
@@ -309,17 +324,18 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 			});
 			files.addView(b);
 		}
+		mProgressDialog.dismiss();
 	}
 
 	public void displayRates() {
 		// button1.setEnabled(true);
 
-		sampling_rate_textview.setText(""+Math.round(accelerometerListener.getSamplingRate()));
+		sampling_rate_textview.setText(""
+				+ Math.round(accelerometerListener.getSamplingRate()));
 	}
 
 	public void exportAcceltoCSV(final int runId) throws IOException {
 		{
-
 			File folder = new File(accelPath);
 
 			folder.mkdirs();
@@ -330,7 +346,8 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 			// show waiting screen
 			CharSequence contentTitle = getString(R.string.app_name);
 			final ProgressDialog progDailog = ProgressDialog.show(this,
-					contentTitle, getString(R.string.msg_please_wait), true);// please wait
+					contentTitle, getString(R.string.msg_please_wait), true);// please
+																				// wait
 			final Handler handler = new Handler() {
 				@Override
 				public void handleMessage(Message msg) {
@@ -508,6 +525,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 
 		public void closeZip() {
 			try {
+				out.flush();
 				out.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -526,7 +544,8 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 
 			InetAddress client_adress = null;
 			try {
-				client_adress = InetAddress.getByName(mIP_Adress.getText().toString());
+				client_adress = InetAddress.getByName(mIP_Adress.getText()
+						.toString());
 			} catch (UnknownHostException e) {
 				showDialog(R.string.error_invalidaddr);
 				return false;
@@ -573,40 +592,86 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 		return conman.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
 				.isConnectedOrConnecting();
 	}
-	
+
 	@Override
-	protected void processData(String data){
-		if(mConnected){
-			Log.d(TAG, "Hear rate data: "+data);
-			if(heart_rate != null){
+	protected void processData(String data) {
+		if (mConnected) {
+			Log.d(TAG, "Hear rate data: " + data);
+			if (heart_rate != null) {
 				heart_rate.setText(data);
-				
-				if(recording){
+
+				if (recording) {
 					hds.open();
-					hds.addHeartRateSilent(new HeartRateData(Long.parseLong(data), System.currentTimeMillis(), accelerometerListener.run_id));
+					hds.addHeartRateSilent(new HeartRateData(Long
+							.parseLong(data), System.currentTimeMillis(),
+							accelerometerListener.run_id));
 					hds.close();
-					//new UDPThread().execute(data + ", " + System.currentTimeMillis());
+					// new UDPThread().execute(data + ", " +
+					// System.currentTimeMillis());
 				}
 			}
 		}
 	}
-	
+
 	@Override
-	protected void onBluetoothDisconnected(){
+	protected void onBluetoothDisconnected() {
 		Log.d(TAG, "Hear rate sensor disconnected");
-		if(heart_rate != null){
+		if (heart_rate != null) {
 			heart_rate.setText("-");
 		}
-		
-		//connect.setVisibility(View.VISIBLE);
+
+		// connect.setVisibility(View.VISIBLE);
+	}
+
+	@Override
+	protected void onBluetoothConnected() {
+		Log.d(TAG, "Hear rate sensor connected");
+		if (heart_rate != null) {
+			heart_rate.setText("...");
+			// connect.setVisibility(View.GONE);
+		}
 	}
 	
-	@Override
-	protected void onBluetoothConnected(){
-		Log.d(TAG, "Hear rate sensor connected");
-		if(heart_rate != null){
-			heart_rate.setText("...");
-//			connect.setVisibility(View.GONE);
+	public class ProgressTask extends AsyncTask<String, Void, String> {
+		@Override
+		protected void onPreExecute() {
+			mProgressDialog.show();
+		}
+
+		@Override
+		protected String doInBackground(String... arg0) {
+
+			// my stuff is here
+			backupDB();
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+			mProgressDialog.dismiss();
+		}
+	}
+
+	public class ProgressTaskBackupAndDelete extends
+			AsyncTask<String, Void, String> {
+		@Override
+		protected void onPreExecute() {
+			mProgressDialog.show();
+		}
+
+		@Override
+		protected String doInBackground(String... arg0) {
+			// Remove the datapoints to save space
+			DatabaseHelper dbHelper = new DatabaseHelper(
+					MainMovementActivity.this);
+			dbHelper.doSaveDelete(dbHelper.getWritableDatabase());
+
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+			mProgressDialog.dismiss();
 		}
 	}
 }

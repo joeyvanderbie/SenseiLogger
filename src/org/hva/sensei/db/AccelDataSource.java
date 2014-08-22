@@ -71,7 +71,7 @@ public class AccelDataSource {
 			AccelData acd;
 			for (int i = 0; i< accel.size(); i++){
 				 acd = accel.get(i);
-				statement.bindDouble(1, acd.getRun_id());
+				statement.bindLong(1, acd.getRun_id());
 				statement.bindDouble(2, acd.getX());
 				statement.bindDouble(3, acd.getY());
 				statement.bindDouble(4, acd.getZ());
@@ -174,6 +174,7 @@ public class AccelDataSource {
 		if (c != null && c.moveToFirst()) {
 		    lastId = c.getInt(0); //The 0 is the column index, we only have 1 column, so the index is 0
 		}
+		c.close();
 		return lastId;
 	}
 	
@@ -184,6 +185,7 @@ public class AccelDataSource {
 		if (c != null && c.moveToFirst()) {
 		    lastId = c.getInt(0); //The 0 is the column index, we only have 1 column, so the index is 0
 		}
+		c.close();
 		return lastId;
 	}
 

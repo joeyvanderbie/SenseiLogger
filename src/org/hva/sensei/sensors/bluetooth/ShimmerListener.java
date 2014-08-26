@@ -60,8 +60,9 @@ import com.shimmerresearch.driver.ObjectCluster;
 
 public class ShimmerListener {
     /** Called when the activity is first created. */
-    //String bluetoothAddress="00:06:66:A0:3B:33";
-    String bluetoothAddress="00:06:66:A0:3A:4F";
+    String bluetoothAddress="00:06:66:A0:3A:22";
+//    String bluetoothAddress="00:06:66:A0:3B:33";
+//    String bluetoothAddress="00:06:66:A0:3A:4F";
     private Shimmer mShimmerDevice1 = null;
     private long startTime;
     private long startTimeStamp = 0;
@@ -75,7 +76,7 @@ public class ShimmerListener {
     
     public ShimmerListener(MainMovementActivity activ){
     	this.accelerometerTest = activ;
-        mShimmerDevice1 = new Shimmer(activ, mHandler,"RightArm", 100, 0, 0, Shimmer.SENSOR_ACCEL, false);  
+        mShimmerDevice1 = new Shimmer(activ, mHandler,"RightArm", 50, 0, 0, Shimmer.SENSOR_ACCEL, false);  
 
     }
     

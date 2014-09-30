@@ -26,7 +26,9 @@ import android.widget.Toast;
 public class BluetoothHeartRateActivity extends Activity{
 
 	protected boolean mConnected;
-	protected String mDeviceAddress = "E5:86:D2:0E:8E:E6";
+	public String mDeviceAddress = "C3:4D:F2:BD:3B:63"; //mio
+			// TRKR "E5:86:D2:0E:8E:E6";
+			
     public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
     private BluetoothGattCharacteristic mNotifyCharacteristic;
 	protected BluetoothLeService mBluetoothLeService;
@@ -117,31 +119,44 @@ public class BluetoothHeartRateActivity extends Activity{
     protected void onResume() {
         super.onResume();
         
-        if(bluetoothLECompatible()){
-        
-	        // Ensures Bluetooth is enabled on the device.  If Bluetooth is not currently enabled,
-	        // fire an intent to display a dialog asking the user to grant permission to enable it.
-	       if (!mBluetoothAdapter.isEnabled()) {
-	            if (!mBluetoothAdapter.isEnabled()) {
-	                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-	                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-	            }
-	        }
-	        
-	        
-	        registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
-	        if (mBluetoothLeService != null) {
-	            final boolean result = mBluetoothLeService.connect(mDeviceAddress);
-	            Log.d(TAG, "Connect request result=" + result);
-	        }else{
-	        	Log.d(TAG, "No BluetoothLeService");
-	        	  scanLeDevice(true);
-	        	
-	        }
-        }
-        
-      
-        	
+        reconnectBluetooth();
+       
+    }
+    
+    protected void reconnectBluetooth(){
+    	 if(bluetoothLECompatible()){
+    	        
+ 	        // Ensures Bluetooth is enabled on the device.  If Bluetooth is not currently enabled,
+ 	        // fire an intent to display a dialog asking the user to grant permission to enable it.
+ 	       if (!mBluetoothAdapter.isEnabled()) {
+ 	            if (!mBluetoothAdapter.isEnabled()) {
+ 	                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+ 	                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+ 	            }
+ 	        }
+ 	        
+ 	        
+ 	        registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
+ 	        if (mBluetoothLeService != null) {
+ 	            final boolean result = mBluetoothLeService.connect(mDeviceAddress);
+ 	            Log.d(TAG, "Connect request result=" + result);
+ 	        }else{
+ 	        	Log.d(TAG, "No BluetoothLeService");
+ 	        	  scanLeDevice(true);
+ 	        	
+ 	        }
+         }
+    }
+    
+    protected void disconnectBluetooth(){
+    	unregisterReceiver(mGattUpdateReceiver);
+
+    	try{
+    		unbindService(mServiceConnection);
+    	}catch(IllegalArgumentException e){
+    		Log.d(TAG, e.toString());
+    	}
+    		mBluetoothLeService = null;
     }
 
     @Override
@@ -153,10 +168,7 @@ public class BluetoothHeartRateActivity extends Activity{
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(mGattUpdateReceiver);
-
-        unbindService(mServiceConnection);
-        mBluetoothLeService = null;
+        disconnectBluetooth();
     }
     
 	// Demonstrates how to iterate through the supported GATT
@@ -314,4 +326,8 @@ public class BluetoothHeartRateActivity extends Activity{
 	        }
 	        super.onActivityResult(requestCode, resultCode, data);
 	    }
+	 
+	 public void setDeviceAdress(String address){
+		 mDeviceAddress = address;
+	 }
 }

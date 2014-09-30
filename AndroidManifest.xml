@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.hva.sensei.logger"
-    android:versionCode="9"
-    android:versionName="1.7 Fast logger to CSV" >
+    android:versionCode="12"
+    android:versionName="1.8.1" >
 
     <uses-sdk
         android:minSdkVersion="14"

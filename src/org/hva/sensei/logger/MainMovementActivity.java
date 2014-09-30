@@ -49,13 +49,19 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RadioGroup;
+import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
 public class MainMovementActivity extends BluetoothHeartRateActivity {
 	public static DatagramSocket mSocket = null;
 	public static DatagramPacket mPacket = null;
+	private RadioGroup radioHeartRateGroup;
+	private EditText samplingRateTextField;
+	private LinearLayout settingsLayout;
 	TextView mIP_Adress;
 	TextView mPort;
 	TextView sampling_rate_textview;
@@ -71,8 +77,8 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 	boolean recording = false;
 
 	AccelerometerListener accelerometerListener;
-	private int delayInMicroseconds = 50000; // for 20Hz sampling rate
-												// SensorManager.SENSOR_DELAY_FASTEST;//
+	private int delayInMicroseconds = 10000;//50000; // for 20Hz sampling rate SensorManager.SENSOR_DELAY_FASTEST;//
+	// 
 	private boolean streamData = false;
 	Sensor mSensor;
 
@@ -105,6 +111,15 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 
 	private HeartRateDataSource hds;
 
+	private void addNewAcceleromterListener(int newDelayInMicroseconds){
+		sensorManager.unregisterListener(accelerometerListener);
+
+		delayInMicroseconds = newDelayInMicroseconds;
+		
+		sensorManager.registerListener(accelerometerListener, accelerometer,
+				delayInMicroseconds);
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -122,6 +137,38 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 		sensorManager.registerListener(accelerometerListener, accelerometer,
 				delayInMicroseconds);
 
+		
+	settingsLayout = (LinearLayout) findViewById(R.id.settingsLayout);
+		
+		Button settingsButton = (Button) findViewById(R.id.toggleSettings);
+		settingsButton.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				if(settingsLayout.getVisibility() == View.VISIBLE){
+					settingsLayout.setVisibility(View.GONE);
+				}else{
+					settingsLayout.setVisibility(View.VISIBLE);
+				}
+			}
+		});
+		
+		samplingRateTextField = (EditText) findViewById(R.id.sampling_rate);
+		samplingRateTextField.setText(""+delayInMicroseconds);
+		
+		Button updateSamplingRateButton = (Button) findViewById(R.id.update_sampling_rate_button);
+		updateSamplingRateButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				int newSamplingRate = Integer.parseInt(samplingRateTextField.getText().toString());
+				if(newSamplingRate > 0){
+					addNewAcceleromterListener(newSamplingRate);
+				}
+				
+			}
+		});
+		
 		hds = new HeartRateDataSource(this);
 
 		// Register our receiver for the ACTION_SCREEN_OFF action. This will
@@ -135,6 +182,28 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 		wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
 				"SenseiWakeLock");
 
+		radioHeartRateGroup = (RadioGroup) findViewById(R.id.radioHeartRateSensor);
+		radioHeartRateGroup.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(RadioGroup group, int checkedId) {
+				if(checkedId == R.id.radioHeartRateNone){
+					//disable bluetooth connection ect
+					MainMovementActivity.this.disconnectBluetooth();
+					MainMovementActivity.this.updateHearRate("0");
+				}else if(checkedId == R.id.radioHeartRateMioLink){
+					MainMovementActivity.this.updateHearRate("0");
+					MainMovementActivity.this.setDeviceAdress("C3:4D:F2:BD:3B:63");
+					MainMovementActivity.this.reconnectBluetooth();
+				}else if(checkedId == R.id.radioHeartRateWahooTICKR){
+					MainMovementActivity.this.updateHearRate("0");
+					MainMovementActivity.this.setDeviceAdress("E5:86:D2:0E:8E:E6");
+					MainMovementActivity.this.reconnectBluetooth();
+				}
+				
+			}
+		});
+		
 		sampling_rate_textview = (TextView) findViewById(R.id.sampling_rate_info);
 		button1 = (Button) findViewById(R.id.button1);
 		button1.setOnClickListener(new View.OnClickListener() {
@@ -170,17 +239,17 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 
 				accelerometerListener.stopRecording();
 				wakeLock.release();
-				// stop_UDP_Stream();
-				try {
-					exportAcceltoCSV(accelerometerListener.run_id);
-					updateFileList();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+//				 stop_UDP_Stream();
+//				try {
+//					exportAcceltoCSV(accelerometerListener.run_id);
+//					updateFileList();
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
 				recording = false;
 
-				 backupDB();
+//				 backupDB();
 			}
 		});
 
@@ -596,6 +665,11 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 	@Override
 	protected void processData(String data) {
 		if (mConnected) {
+			updateHearRate(data);
+		}
+	}
+	
+	protected void updateHearRate(String data) {
 			Log.d(TAG, "Hear rate data: " + data);
 			if (heart_rate != null) {
 				heart_rate.setText(data);
@@ -610,7 +684,6 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 					// System.currentTimeMillis());
 				}
 			}
-		}
 	}
 
 	@Override

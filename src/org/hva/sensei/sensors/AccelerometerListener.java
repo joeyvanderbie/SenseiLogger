@@ -3,7 +3,9 @@ package org.hva.sensei.sensors;
 import java.util.ArrayList;
 
 import org.hva.sensei.data.AccelData;
+import org.hva.sensei.data.HeartRateData;
 import org.hva.sensei.db.AccelDataSource;
+import org.hva.sensei.db.HeartRateDataSource;
 import org.hva.sensei.logger.MainMovementActivity;
 
 import android.hardware.Sensor;
@@ -15,6 +17,7 @@ import android.util.Log;
 
 public class AccelerometerListener implements SensorEventListener {
 
+	private int heart_rate = 0;
     private long startTime;
     private int numSamples;
     private boolean isActive = false;
@@ -22,6 +25,7 @@ public class AccelerometerListener implements SensorEventListener {
     private MainMovementActivity accelerometerTest;
     private ArrayList<AccelData> samples;
     private AccelDataSource ads;
+    private HeartRateDataSource hds;
     public int run_id = 0;
     private long sensorTimeReference = 0l;
     private long myTimeReference = 0l;
@@ -50,6 +54,7 @@ public class AccelerometerListener implements SensorEventListener {
         isActive = true;
         this.samples = new ArrayList<AccelData>();
         ads = new AccelDataSource(accelerometerTest);
+    	hds = new HeartRateDataSource(accelerometerTest);
         ads.open();
         run_id = ads.getLastAccelRunId()+1;
         ads.close();
@@ -76,6 +81,11 @@ public class AccelerometerListener implements SensorEventListener {
             if((now - startTime) % 500 < 100 ){
             	samplingRate = numSamples / ((now - startTime) / 1000.0);      
             	 accelerometerTest.displayRates();
+            	 
+            	 //update heartrate
+            	 hds.open();
+            	 heart_rate =  hds.getLastHeartRate(run_id);
+				hds.close();            	 
             }
             
           //  if (now >= startTime + 5000) {
@@ -110,10 +120,10 @@ public class AccelerometerListener implements SensorEventListener {
             
             if (numSamples >= 100) {
             	 startTime = now;
-            	new ProgressTaskAccelData().execute(samples);
+            	//new ProgressTaskAccelData().execute(samples);
             	
             	numSamples = 0;
-            	 samples = new ArrayList<AccelData>();
+            	// samples = new ArrayList<AccelData>();
                //Do Garbage Collection to make sure delay of GC is not longer than 50ms
                System.gc();
             }
@@ -125,7 +135,7 @@ public class AccelerometerListener implements SensorEventListener {
             // set event timestamp to current time in milliseconds
             event.timestamp = myTimeReference + 
                 Math.round((event.timestamp - sensorTimeReference) / 1000000.0);
-            samples.add(new AccelData(event.timestamp, event.values[0], event.values[1], event.values[2], run_id));
+           // samples.add(new AccelData(event.timestamp, event.values[0], event.values[1], event.values[2], run_id));
 
            
 
@@ -141,7 +151,7 @@ public class AccelerometerListener implements SensorEventListener {
 //            if(samples.size() > 2){
 //            Log.d("Delta t", ""+(samples.get(samples.size()-2).getTimestamp()-event.timestamp) );
 //            }
-//        	new UDPThread().execute(event.values[0] + ", " + event.values[1] + ", " + event.values[2] + ", " + event.timestamp + ", "+ heartrate);
+        	new UDPThread().execute(event.values[0] + ", " + event.values[1] + ", " + event.values[2] + ", " + event.timestamp + ", "+ heart_rate);
         }
     }
     
@@ -156,7 +166,7 @@ public class AccelerometerListener implements SensorEventListener {
     
     public void stopRecording(){
     	isActive = false;
-    	submitLastSensorData();
+    	//submitLastSensorData();
     }
     
 	public class ProgressTask extends AsyncTask<String, Void, String> {

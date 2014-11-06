@@ -27,7 +27,8 @@ import android.widget.Toast;
 public class BluetoothHeartRateActivity extends FragmentActivity{
 
 	protected boolean mConnected;
-	protected String mDeviceAddress = "E5:86:D2:0E:8E:E6";
+	public String mDeviceAddress = "C3:4D:F2:BD:3B:63"; //mio
+			// TRKR "E5:86:D2:0E:8E:E6";
     public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
     private BluetoothGattCharacteristic mNotifyCharacteristic;
 	protected BluetoothLeService mBluetoothLeService;

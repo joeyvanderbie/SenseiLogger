@@ -2,12 +2,17 @@ package org.hva.sensei.logger;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -27,6 +32,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.hva.sensei.data.AccelData;
 import org.hva.sensei.data.HeartRateData;
 import org.hva.sensei.data.LocationData;
@@ -54,12 +63,11 @@ import android.graphics.Point;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.location.Location;
-import android.media.AudioFormat;
 import android.media.AudioManager;
-import android.media.AudioTrack;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -119,6 +127,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity implements
 	WakeLock voice;
 	boolean recording = false;
 
+	TextView run_nr_textview;
 	AccelerometerListener accelerometerListener;
 	private int delayInMicroseconds = SensorManager.SENSOR_DELAY_FASTEST;// 50000;
 																			// //
@@ -137,6 +146,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity implements
 	private static final long SCAN_PERIOD = 10000;
 
 	private TextView heart_rate;
+	private TextView speed;
 	// private Button connect;
 
 	private HeartRateDataSource hds;
@@ -286,6 +296,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity implements
 		wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
 				"SenseiWakeLock");
 		voice = mgr.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "SenseiVoiceWakeLock");
+		run_nr_textview = (TextView) findViewById(R.id.run_id);
 	      
 
 		sampling_rate_textview = (TextView) findViewById(R.id.sampling_rate_info);
@@ -301,9 +312,11 @@ public class MainMovementActivity extends BluetoothHeartRateActivity implements
 				button2.setEnabled(true);
 				sampling_rate_textview.setText("...");
 
-				// start_UDP_Stream();
+				 start_UDP_Stream();
 				accelerometerListener.startRecording();
 
+				run_nr_textview.setText("" + accelerometerListener.run_id);
+				
 				wakeLock.acquire();
 				recording = true;
 
@@ -327,7 +340,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity implements
 
 				accelerometerListener.stopRecording();
 				wakeLock.release();
-				// stop_UDP_Stream();
+				 stop_UDP_Stream();
 				// try {
 				// exportAcceltoCSV(accelerometerListener.run_id);
 				// updateFileList();
@@ -366,10 +379,11 @@ public class MainMovementActivity extends BluetoothHeartRateActivity implements
 					}
 				});
 
-		updateFileList();
+		//updateFileList();
 
 		// bluetooth hr
 		heart_rate = (TextView) findViewById(R.id.heart_rate_info);
+		speed = (TextView) findViewById(R.id.speed_info);
 		// connect = (Button) findViewById(R.id.connect_device);
 		// connect.setOnClickListener(new View.OnClickListener() {
 		//
@@ -1086,7 +1100,10 @@ public class MainMovementActivity extends BluetoothHeartRateActivity implements
 		Log.d(TAG,
 				"Location: " + location.getLatitude() + " "
 						+ location.getLongitude());
-
+		
+	
+		
+		
 		LatLng latLng = new LatLng(location.getLatitude(),
 				location.getLongitude());
 		CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng,
@@ -1104,7 +1121,59 @@ public class MainMovementActivity extends BluetoothHeartRateActivity implements
 		lds.open();
 		lds.add(new LocationData(location, accelerometerListener.run_id));
 		lds.close();
-
+		
+		Log.d(TAG,
+				"Speed: " + 	location.getSpeed());
+		//speed.setText(location.getSpeed()*3.6+""); // Convert m/s to Km/h
+		if(previousLocation == null){
+			previousLocation = location;
+		}
+//		double dist = getDistance(location.getLatitude(), location.getLongitude(), previousLocation.getLatitude(), previousLocation.getLongitude());
+//		double speedTmp  = dist / ((location.getTime() - previousLocation.getTime()) / 1000) *3.6;
+//		//speedTmp = speedTmp < 1? 0:speedTmp;
+//		if(speedTmp > 0){
+//			speedTmp = round(speedTmp, 2);
+//		}
+//		Log.d(TAG, "Speed2: "+speedTmp) ;
+		
+		//double speedTmp = (previousLocation.getSpeed() + location.getSpeed()) / 2 * 3.6;
+		
+		speed.setText(location.getSpeed()*3.6 +""); // Convert m/s to Km/h
+		
+		previousLocation = location;
+		
+		String url = "https://oege.ie.hva.nl/~biejh/silex/web/index.php/updaterun?" ;
+		url += "runid="+this.accelerometerListener.run_id;
+		url += "&speed="+location.getSpeed()*3.6;
+		url += "&lat="+location.getLatitude();
+		url += "&lon="+location.getLongitude();
+		url += "&timestamp="+location.getTime();
+		
+		 hds.open();
+         int heartrate = hds.getLastHeartRate(this.accelerometerListener.run_id);
+ 		url += "&heartrate="+heartrate;
+         hds.close();
+		
+         Log.d(TAG, "url "+url);
+ 		
+         
+		new HttpAsyncTask().execute(url);
+		
+	}
+	
+	private Location previousLocation;
+	
+	//en.wikipedia.org/wiki/Haversine_formula
+	public double getDistance(double lat1, double lon1, double lat2, double lon2) 
+	{ 
+	double latA = Math.toRadians(lat1); 
+	double lonA = Math.toRadians(lon1);
+	double latB = Math.toRadians(lat2); 
+	double lonB = Math.toRadians(lon2); 
+	double cosAng = (Math.cos(latA) * Math.cos(latB) * Math.cos(lonB-lonA)) + (Math.sin(latA) * Math.sin(latB)); 
+	double ang = Math.acos(cosAng); 
+	double dist = ang *6371; 
+	return dist;
 	}
 
 	public void animateMarker(final Marker marker, final LatLng toPosition,
@@ -1370,7 +1439,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity implements
 //					ToneGenerator tone = new ToneGenerator();
 //					tone.playSound(8000, tone.genTone());
 					SoundPool sp = new SoundPool(5, AudioManager.STREAM_MUSIC, 0);
-					 int soundId = sp.load(this, R.raw.answering_machine, 1); 
+					 int soundId = sp.load(this, R.raw.beep, 1); 
 					 sp.play(soundId, 1, 1, 0, 0, 1);
 				}
 
@@ -1405,7 +1474,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity implements
 //		audioTrack.play();
 
 		SoundPool sp = new SoundPool(5, AudioManager.STREAM_MUSIC, 0);
-		 int soundId = sp.load(this, R.raw.answering_machine, 1); 
+		 int soundId = sp.load(this, R.raw.beep, 1); 
 		 sp.play(soundId, 1, 1, 0, 0, 1);
 		
 		audioHandler.postDelayed(new Runnable() {
@@ -1424,10 +1493,8 @@ public class MainMovementActivity extends BluetoothHeartRateActivity implements
 
           @Override
           protected String doInBackground(String... arg0) {
-			
                   //my stuff is here
         	  		backupDB(); 
-        	  		
         	  		return null;
           }
 
@@ -1464,5 +1531,77 @@ public class MainMovementActivity extends BluetoothHeartRateActivity implements
                  mProgressDialog.dismiss();
           }
       }
+	  
+	  private class HttpAsyncTask extends AsyncTask<String, Void, String> {
+	        @Override
+	        protected String doInBackground(String... urls) {
+	 
+	            return GET(urls[0]);
+	        }
+	        // onPostExecute displays the results of the AsyncTask.
+	        @Override
+	        protected void onPostExecute(String result) {
+//	            Toast.makeText(getBaseContext(), "Received!", Toast.LENGTH_LONG).show();
+	            Log.d(TAG, "Get results: "+result);
+	       }
+	    }
+	  
+	  public static String GET(String url){
+	        InputStream inputStream = null;
+	        String result = "";
+	        try {
+	 
+	            // create HttpClient
+	            HttpClient httpclient = new DefaultHttpClient();
+	 
+	            // make GET request to the given URL
+	            HttpResponse httpResponse = httpclient.execute(new HttpGet(url));
+	            // receive response as inputStream
+	            inputStream = httpResponse.getEntity().getContent();
+	 
+	            // convert inputstream to string
+	            if(inputStream != null)
+	                result = convertInputStreamToString(inputStream);
+	            else
+	                result = "Did not work!";
+	 
+	        } catch (Exception e) {
+	            Log.d("InputStream", e.getLocalizedMessage());
+	        }
+	 
+	        return result;
+	    }
+	 
+	    // convert inputstream to String
+	    private static String convertInputStreamToString(InputStream inputStream) throws IOException{
+	        BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
+	        String line = "";
+	        String result = "";
+	        while((line = bufferedReader.readLine()) != null)
+	            result += line;
+	 
+	        inputStream.close();
+	        return result;
+	 
+	    }
+	 
+	    // check network connection
+	    public boolean isConnected(){
+	        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(this.CONNECTIVITY_SERVICE);
+	            NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+	            if (networkInfo != null && networkInfo.isConnected()) 
+	                return true;
+	            else
+	                return false;   
+	    }
+	    
+	    public static double round(double value, int places) {
+	        if (places < 0) throw new IllegalArgumentException();
+
+	        BigDecimal bd = new BigDecimal(value);
+	        bd = bd.setScale(places, RoundingMode.HALF_UP);
+	        return bd.doubleValue();
+	    }
+
 
 }

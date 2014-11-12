@@ -123,9 +123,10 @@ public class AccelerometerListener implements SensorEventListener {
                 myTimeReference = System.currentTimeMillis();
             }
             // set event timestamp to current time in milliseconds
-            event.timestamp = myTimeReference + 
-                Math.round((event.timestamp - sensorTimeReference) / 1000000.0);
-            samples.add(new AccelData(event.timestamp, event.values[0], event.values[1], event.values[2], run_id));
+//            event.timestamp = myTimeReference + 
+//                Math.round((event.timestamp - sensorTimeReference) / 1000000.0);
+            samples.add(new AccelData(event.timestamp, myTimeReference + 
+                    Math.round((event.timestamp - sensorTimeReference) / 1000000.0), event.values[0], event.values[1], event.values[2], run_id));
 
            
 
@@ -160,25 +161,25 @@ public class AccelerometerListener implements SensorEventListener {
     	submitLastSensorData();
     }
     
-	public class ProgressTask extends AsyncTask<String, Void, String> {
-		@Override
-		protected void onPreExecute() {
-			
-		}
-
-		@Override
-		protected String doInBackground(String... params) {
-			ads.open();
-	        ads.add(new AccelData(Long.parseLong(params[0]), Double.parseDouble(params[1]), Double.parseDouble(params[2]), Double.parseDouble(params[3]), Long.parseLong(params[4])), 0, 0);
-			ads.close();
-			
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(String result) {
-		}
-	}
+//	public class ProgressTask extends AsyncTask<String, Void, String> {
+//		@Override
+//		protected void onPreExecute() {
+//			
+//		}
+//
+//		@Override
+//		protected String doInBackground(String... params) {
+//			ads.open();
+//	        ads.add(new AccelData(Long.parseLong(params[0]), Long.parseLong(params[5]), Double.parseDouble(params[1]), Double.parseDouble(params[2]), Double.parseDouble(params[3]), Long.parseLong(params[4])), 0, 0);
+//			ads.close();
+//			
+//			return null;
+//		}
+//
+//		@Override
+//		protected void onPostExecute(String result) {
+//		}
+//	}
 	
 	public class ProgressTaskAccelData extends AsyncTask<ArrayList<AccelData>, Void, String> {
 		@Override

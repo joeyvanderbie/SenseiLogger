@@ -62,6 +62,7 @@ public class MainMovementActivity extends Activity {
 	TextView sampling_rate_textview;
 	TextView user_nr;
 	TextView run_nr_textview;
+	TextView message;
 	Button button1;
 	Button button2;
 	Button button3;
@@ -137,6 +138,8 @@ public class MainMovementActivity extends Activity {
 		run_nr_textview = (TextView) findViewById(R.id.run_id);
 		user_nr = (TextView) findViewById(R.id.user_nr);
 		sampling_rate_textview = (TextView) findViewById(R.id.sampling_rate_info);
+		message = (TextView) findViewById(R.id.text_view);
+		
 		button1 = (Button) findViewById(R.id.button1);
 		button1.setOnClickListener(new View.OnClickListener() {
 
@@ -150,6 +153,9 @@ public class MainMovementActivity extends Activity {
 				sampling_rate_textview.setText("...");
 
 				// start_UDP_Stream();
+				
+				message.setText("Startdatetime: "+System.currentTimeMillis());
+				
 				accelerometerListener.startRecording();
 
 				UserDataSource uds = new UserDataSource(
@@ -181,7 +187,10 @@ public class MainMovementActivity extends Activity {
 
 				sampling_rate_textview.setText("-");
 
+				
 				accelerometerListener.stopRecording();
+				message.setText(message.getText()+"\nEnddatetime: "+System.currentTimeMillis());
+				
 				wakeLock.release();
 				// stop_UDP_Stream();
 

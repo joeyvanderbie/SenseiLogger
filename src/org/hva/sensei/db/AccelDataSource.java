@@ -75,7 +75,7 @@ public class AccelDataSource {
 				statement.bindDouble(2, acd.getX());
 				statement.bindDouble(3, acd.getY());
 				statement.bindDouble(4, acd.getZ());
-				statement.bindString(5, acd.getTimestamp()+"");
+				statement.bindString(5, acd.getTimestamp()+""+acd.getTimestamp2());
 
 				statement.execute();
 			}

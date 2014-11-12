@@ -2,6 +2,7 @@ package org.hva.sensei.data;
 
 public class AccelData {
 	private long timestamp;
+	private long timestamp2;
 	private double x;
 	private double y;
 	private double z;
@@ -9,8 +10,9 @@ public class AccelData {
 	private long run_id;
 	
 	
-	public AccelData(long timestamp, double x, double y, double z, long run_id) {
+	public AccelData(long timestamp, long timestamp2, double x, double y, double z, long run_id) {
 		this.timestamp = timestamp;
+		this.setTimestamp2(timestamp2);
 		this.x = x;
 		this.y = y;
 		this.z = z;
@@ -60,6 +62,14 @@ public class AccelData {
 	}
 	public void setId(long id) {
 		this.id = id;
+	}
+
+	public long getTimestamp2() {
+		return timestamp2;
+	}
+	
+	public void setTimestamp2(long timestamp2) {
+		this.timestamp2 = timestamp2;
 	}
 	
 

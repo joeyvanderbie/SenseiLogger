@@ -38,7 +38,42 @@
                 android:text="@string/app_name_sim"
                 android:textSize="20sp" />
         </LinearLayout>
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="50dip"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:weightSum="4" >
 
+            <ImageView
+                android:id="@+id/COMMIT"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1.07"
+                android:src="@drawable/commit" />
+
+            <ImageView
+                android:id="@+id/ACE"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1.07"
+                android:src="@drawable/ace" />
+
+            <ImageView
+                android:id="@+id/CREATEIT"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_margin="10dip"
+                android:layout_weight="1.07"
+                android:src="@drawable/createit" />
+
+            <ImageView
+                android:id="@+id/HVA"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="0.79"
+                android:src="@drawable/hva" />
+        </LinearLayout>
         <TextView
             android:id="@+id/text_view"
             android:layout_width="wrap_content"
@@ -187,6 +222,15 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/hint_target_port"
                 android:inputType="number" />
+            
+            
+             <EditText
+                android:id="@+id/shimmer_mac"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_shimmer_mac"
+                android:inputType="text" />
+            
         </LinearLayout>
 
         <LinearLayout
@@ -208,43 +252,6 @@
                 android:layout_marginTop="@dimen/activity_vertical_margin"
                 android:orientation="vertical" >
             </LinearLayout>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="50dip"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:weightSum="4" >
-
-            <ImageView
-                android:id="@+id/COMMIT"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1.07"
-                android:src="@drawable/commit" />
-
-            <ImageView
-                android:id="@+id/ACE"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1.07"
-                android:src="@drawable/ace" />
-
-            <ImageView
-                android:id="@+id/CREATEIT"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_margin="10dip"
-                android:layout_weight="1.07"
-                android:src="@drawable/createit" />
-
-            <ImageView
-                android:id="@+id/HVA"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="0.79"
-                android:src="@drawable/hva" />
         </LinearLayout>
     </LinearLayout>
 

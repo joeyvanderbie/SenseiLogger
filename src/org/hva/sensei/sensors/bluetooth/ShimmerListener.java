@@ -60,7 +60,7 @@ import com.shimmerresearch.driver.ObjectCluster;
 
 public class ShimmerListener {
     /** Called when the activity is first created. */
-    String bluetoothAddress="00:06:66:A0:3A:22";
+    private String bluetoothAddress="00:06:66:A0:3A:22";
 //    String bluetoothAddress="00:06:66:A0:3B:33";
 //    String bluetoothAddress="00:06:66:A0:3A:4F";
     private Shimmer mShimmerDevice1 = null;
@@ -230,7 +230,7 @@ public class ShimmerListener {
 	    
 	    public void start(){
 	        Log.d("ConnectionStatus","Trying"); 
-	         mShimmerDevice1.connect(bluetoothAddress,"default"); 
+	         mShimmerDevice1.connect(getBluetoothAddress(),"default"); 
 	    }
 	    
 	    public void stop(){
@@ -256,6 +256,14 @@ public class ShimmerListener {
 	    public ArrayList<AccelData> getSamples(){
 	    	return samples;
 	    }
+
+		private String getBluetoothAddress() {
+			return bluetoothAddress;
+		}
+
+		public void setBluetoothAddress(String bluetoothAddress) {
+			this.bluetoothAddress = bluetoothAddress;
+		}
     }
     
 

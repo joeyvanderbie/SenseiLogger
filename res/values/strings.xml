@@ -39,6 +39,7 @@
     <string name="msg_please_wait">Generating data files</string>
     <string name="hint_target_ip">Target IP</string>
     <string name="hint_target_port">Target port</string>
+    <string name="hint_shimmer_mac">Shimmer mac</string>
     <string name="label_data_to_target">Stream data to IP</string>
     <string name="label_data_files">File list</string>
     

@@ -47,13 +47,17 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
 public class MainMovementActivity extends BluetoothHeartRateActivity {
+
+	String bluetoothAddress = "00:06:66:A0:3A:22";
 	public static DatagramSocket mSocket = null;
 	public static DatagramPacket mPacket = null;
+	EditText shimmer_mac_et;
 	TextView mIP_Adress;
 	TextView mPort;
 	TextView sampling_rate_textview;
@@ -95,6 +99,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 	};
 
 	private TextView heart_rate;
+	private TextView message;
 //	private Button connect;
 	
 	@Override
@@ -124,12 +129,16 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 		wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
 				"SenseiWakeLock");
 
+		message = (TextView) findViewById(R.id.text_view);
+		shimmer_mac_et = (EditText) findViewById(R.id.shimmer_mac);
 		sampling_rate_textview = (TextView) findViewById(R.id.sampling_rate_info);
 		button1 = (Button) findViewById(R.id.button1);
 		button1.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
+
+				message.setText("");
 				button1.setEnabled(false);
 				button1.setVisibility(View.GONE);
 
@@ -139,10 +148,20 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 
 				// start_UDP_Stream();
 				//accelerometerListener.startRecording();
-				
-				shimmerListener.start();
-				
+				String tmpBluetoothAddress = shimmer_mac_et.getText().toString();
+				if(!tmpBluetoothAddress.isEmpty() && tmpBluetoothAddress.length() == 17){
+					bluetoothAddress = tmpBluetoothAddress;
+				}
+
 				wakeLock.acquire();
+				
+				try {
+					shimmerListener.setBluetoothAddress(bluetoothAddress);
+					shimmerListener.start();
+				}catch(IllegalArgumentException e){
+					message.setText(e.getMessage());
+					stop();
+				}
 
 			}
 		});
@@ -151,39 +170,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 
 			@Override
 			public void onClick(View v) {
-				button1.setEnabled(true);
-				button1.setVisibility(View.VISIBLE);
-				button2.setEnabled(false);
-				button2.setVisibility(View.GONE);
-				
-				sampling_rate_textview.setText("-");
-				
-				//accelerometerListener.stopRecording();
-				shimmerListener.stop();
-				wakeLock.release();
-				// stop_UDP_Stream();
-				try {
-					//exportAcceltoCSV(accelerometerListener.run_id);
-					exportAcceltoCSV(shimmerListener.run_id);
-					updateFileList();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-				String backupLocation = Environment
-						.getExternalStorageDirectory().getAbsolutePath()
-						+ "/Sensei/backup"
-						+ System.currentTimeMillis()
-						+ ".zip";
-
-				ArrayList<String> uploadData = new ArrayList<String>();
-				uploadData.add(backupLocation);
-				makeZip mz = new makeZip(backupLocation);
-				mz.addZipFile(getDatabasePath(DatabaseHelper.DATABASE_NAME)
-						.getAbsolutePath());
-				mz.closeZip();
-
+				stop();
 			}
 		});
 
@@ -219,6 +206,42 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 //				scanLeDevice(true);
 //			}
 //		});
+	}
+	
+	private void stop(){
+		button1.setEnabled(true);
+		button1.setVisibility(View.VISIBLE);
+		button2.setEnabled(false);
+		button2.setVisibility(View.GONE);
+		
+		sampling_rate_textview.setText("-");
+		
+		//accelerometerListener.stopRecording();
+		shimmerListener.stop();
+		wakeLock.release();
+		// stop_UDP_Stream();
+		try {
+			//exportAcceltoCSV(accelerometerListener.run_id);
+			exportAcceltoCSV(shimmerListener.run_id);
+			updateFileList();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		String backupLocation = Environment
+				.getExternalStorageDirectory().getAbsolutePath()
+				+ "/Sensei/backup"
+				+ System.currentTimeMillis()
+				+ ".zip";
+
+		ArrayList<String> uploadData = new ArrayList<String>();
+		uploadData.add(backupLocation);
+		makeZip mz = new makeZip(backupLocation);
+		mz.addZipFile(getDatabasePath(DatabaseHelper.DATABASE_NAME)
+				.getAbsolutePath());
+		mz.closeZip();
+
 	}
 
 	protected void onResume() {

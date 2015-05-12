@@ -40,6 +40,8 @@
     <string name="disconnected">Disconnected</string>
     <string name="heart_rate_header">Heart rate</string>
     <string name="heart_rate_unit_bpm">bpm</string>
+    <string name="heart_rate_rr_header">Heart rate RR</string>
+    <string name="heart_rate_rr_unit_bpm">ms</string>
 
     <!-- Record -->
     <string name="button_start_recording">Start</string>

@@ -97,6 +97,7 @@ public class BluetoothHeartRateActivity extends Activity{
 						.getSupportedGattServices());
 			} else if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
 				 processData(intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
+				 processData(intent.getStringExtra(BluetoothLeService.HEART_RATE_RR));
 			}
 		}
 	};

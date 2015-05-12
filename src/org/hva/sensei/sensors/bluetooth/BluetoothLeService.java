@@ -61,10 +61,13 @@ public class BluetoothLeService extends Service {
     public final static String ACTION_DATA_AVAILABLE =
             "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
     public final static String EXTRA_DATA =
-            "com.example.bluetooth.le.EXTRA_DATA";
+            "com.example.bluetooth.le.EXTRA_DATA";    
+    public final static String HEART_RATE_RR =
+            "com.example.bluetooth.le.HEART_RATE_RR";
 
     public final static UUID UUID_HEART_RATE_MEASUREMENT =
             UUID.fromString(GattAttributes.HEART_RATE_MEASUREMENT);
+
 
     // Implements callback methods for GATT events that the app cares about.  For example,
     // connection change and services discovered.
@@ -126,19 +129,50 @@ public class BluetoothLeService extends Service {
         // This is special handling for the Heart Rate Measurement profile.  Data parsing is
         // carried out as per profile specifications:
         // http://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.heart_rate_measurement.xml
+        //http://stackoverflow.com/questions/20334864/android-bluetooth-le-how-to-get-rr-interval
         if (UUID_HEART_RATE_MEASUREMENT.equals(characteristic.getUuid())) {
             int flag = characteristic.getProperties();
             int format = -1;
+            int energy = -1;
+            int offset = 1;
+            int rr_count = 0;
             if ((flag & 0x01) != 0) {
                 format = BluetoothGattCharacteristic.FORMAT_UINT16;
                 Log.d(TAG, "Heart rate format UINT16.");
+                offset = 3;
             } else {
                 format = BluetoothGattCharacteristic.FORMAT_UINT8;
                 Log.d(TAG, "Heart rate format UINT8.");
+                offset = 2;
+
             }
             final int heartRate = characteristic.getIntValue(format, 1);
             Log.d(TAG, String.format("Received heart rate: %d", heartRate));
-            intent.putExtra(EXTRA_DATA, String.valueOf(heartRate));
+            intent.putExtra(EXTRA_DATA, "HR:"+String.valueOf(heartRate));
+            
+            if ((flag & 0x08) != 0) {
+                // calories present
+                energy = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+                offset += 2;
+                intent.putExtra(EXTRA_DATA, "EN:"+String.valueOf(energy));
+
+                Log.d(TAG, String.format("Received heart rate enerby: %d", energy));
+            }
+            if ((flag & 0x10) != 0){
+                // RR stuff.
+                rr_count = ((characteristic.getValue()).length - offset) / 2;
+                Integer[] mRr_values = new Integer[rr_count];
+                for (int i = 0; i < rr_count; i++){
+                    mRr_values[i] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+                    offset += 2;
+//                    Logger.trace("Received RR: {}", mRr_values[i]);
+                    Log.d(TAG, String.format("Received RR count: %d", mRr_values[i]));
+                }
+                intent.putExtra(HEART_RATE_RR, "RR:"+String.valueOf(mRr_values[mRr_values.length-1]));
+
+            }
+            
+            
         } else {
             // For all other profiles, writes the data formatted in HEX.
             final byte[] data = characteristic.getValue();

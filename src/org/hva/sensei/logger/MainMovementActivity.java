@@ -106,7 +106,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 	// }
 	// };
 
-	private TextView heart_rate;
+	private TextView heart_rate, heart_raterr;
 	// private Button connect;
 
 	private HeartRateDataSource hds;
@@ -190,13 +190,16 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 				if(checkedId == R.id.radioHeartRateNone){
 					//disable bluetooth connection ect
 					MainMovementActivity.this.disconnectBluetooth();
-					MainMovementActivity.this.updateHearRate("0");
+					MainMovementActivity.this.updateHearRate("-");
+					MainMovementActivity.this.updateHearRateRR("-");
 				}else if(checkedId == R.id.radioHeartRateMioLink){
 					MainMovementActivity.this.updateHearRate("0");
+					MainMovementActivity.this.updateHearRateRR("0");
 					MainMovementActivity.this.setDeviceAdress("C3:4D:F2:BD:3B:63");
 					MainMovementActivity.this.reconnectBluetooth();
 				}else if(checkedId == R.id.radioHeartRateWahooTICKR){
 					MainMovementActivity.this.updateHearRate("0");
+					MainMovementActivity.this.updateHearRateRR("0");
 					MainMovementActivity.this.setDeviceAdress("E5:86:D2:0E:8E:E6");
 					MainMovementActivity.this.reconnectBluetooth();
 				}
@@ -249,7 +252,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 //				}
 				recording = false;
 
-//				 backupDB();
+				 backupDB();
 			}
 		});
 
@@ -277,6 +280,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 
 		// bluetooth hr
 		heart_rate = (TextView) findViewById(R.id.heart_rate_info);
+		heart_raterr = (TextView) findViewById(R.id.heart_rate_rr_info);
 		// connect = (Button) findViewById(R.id.connect_device);
 		// connect.setOnClickListener(new View.OnClickListener() {
 		//
@@ -336,12 +340,14 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 	}
 	
 
+	@Override
 	protected void onResume() {
 		super.onResume();
 		// sensorManager.registerListener(accelerometerListener, accelerometer,
 		// delayInMicroseconds);
 	}
 
+	@Override
 	protected void onPause() {
 		super.onPause();
 		// sensorManager.unregisterListener(accelerometerListener);
@@ -425,6 +431,7 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 			};
 
 			new Thread() {
+				@Override
 				public void run() {
 					try {
 
@@ -665,7 +672,11 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 	@Override
 	protected void processData(String data) {
 		if (mConnected) {
-			updateHearRate(data);
+			if(data.substring(0, 3).equals("HR:")) {
+				updateHearRate(data.substring(3));
+			}else if(data.substring(0, 3).equals("RR:")) {
+				updateHearRateRR(data.substring(3));
+			}
 		}
 	}
 	
@@ -685,6 +696,23 @@ public class MainMovementActivity extends BluetoothHeartRateActivity {
 				}
 			}
 	}
+	
+	protected void updateHearRateRR(String data) {
+		Log.d(TAG, "Hear rate RR data: " + data);
+		if (heart_raterr != null) {
+			heart_raterr.setText(data);
+
+			if (recording) {
+				hds.open();
+				hds.addHeartRateRRSilent(new HeartRateData(Long
+						.parseLong(data), System.currentTimeMillis(),
+						accelerometerListener.run_id));
+				hds.close();
+				// new UDPThread().execute(data + ", " +
+				// System.currentTimeMillis());
+			}
+		}
+}
 
 	@Override
 	protected void onBluetoothDisconnected() {

@@ -80,6 +80,14 @@ public final class Database {
 	}
 	
 	/* Inner class that defines the table contents */
+	public static abstract class HeartRateRR implements BaseColumns {
+		public static final String TABLE_NAME = "heartrateRR";
+		public static final String COLUMN_NAME_RUN_ID = "routeid";
+		public static final String COLUMN_NAME_DATETIME = "datetime";
+		public static final String COLUMN_NAME_HEARTRATE= "heartrateRR";
+	}
+	
+	/* Inner class that defines the table contents */
 	public static abstract class RouteRun implements BaseColumns {
 		public static final String TABLE_NAME = "routerun";
 		public static final String COLUMN_NAME_TEAM_ID = "teamid";
@@ -231,6 +239,15 @@ public final class Database {
 	
 	public static final String SQL_DELETE_HEARTRATE = "DROP TABLE IF EXISTS "
 			+ HeartRate.TABLE_NAME;
+
+	public static final String SQL_CREATE_HEARTRATERR = "CREATE TABLE "
+			+ HeartRateRR.TABLE_NAME + " (" + HeartRateRR._ID+ " INTEGER PRIMARY KEY," 
+			+ HeartRateRR.COLUMN_NAME_RUN_ID + TEXT_TYPE + COMMA_SEP 
+			+ HeartRateRR.COLUMN_NAME_DATETIME+ TEXT_TYPE + COMMA_SEP 
+			+ HeartRateRR.COLUMN_NAME_HEARTRATE+ TEXT_TYPE + " )";
+	
+	public static final String SQL_DELETE_HEARTRATERR = "DROP TABLE IF EXISTS "
+			+ HeartRateRR.TABLE_NAME;
 
 	
 }

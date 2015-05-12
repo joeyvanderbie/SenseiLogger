@@ -38,6 +38,15 @@ public class HeartRateDataSource {
 			database.insert(Database.HeartRate.TABLE_NAME, null, values);
 		}
 		
+		public void addHeartRateRRSilent(HeartRateData rr) {
+			ContentValues values = new ContentValues();
+			values.put(Database.HeartRateRR.COLUMN_NAME_RUN_ID, rr.getRun_id());
+			values.put(Database.HeartRateRR.COLUMN_NAME_HEARTRATE, rr.getHeart_rate());
+			values.put(Database.HeartRateRR.COLUMN_NAME_DATETIME, rr.getTimestamp());
+
+			database.insert(Database.HeartRateRR.TABLE_NAME, null, values);
+		}
+		
 		public int getLastHeartRate(long run_id){
 			String query = "SELECT "+Database.HeartRate.COLUMN_NAME_HEARTRATE+" from "+Database.HeartRate.TABLE_NAME +" WHERE " + Database.HeartRate.COLUMN_NAME_RUN_ID + " = "+ run_id + " ORDER BY cast("+Database.HeartRate.COLUMN_NAME_DATETIME+" as REAL) DESC LIMIT 1";
 			Cursor c = database.rawQuery(query,null);
